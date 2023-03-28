@@ -35,24 +35,18 @@ def main():
     user_list.add_user_to_list(user3)
 
     #searchCourse
-    '''
     result = catalog.search_by_diff(66)
     if result == []:
         print("NOT FOUND")
-
     else :
         for i in range (len(result)):
             print(result[i].title)
-    '''
 
     #login
-    '''
     checkpass = user_list.check_password("a@gmail.com","amogus")
     print(checkpass)
-    '''
 
     #payment
-    '''
     cart.add_to_cart(catalog.course_list[2])
     cart.add_to_cart(catalog.course_list[0])
     check_money = cart.initiate_payment(1234)
@@ -62,5 +56,21 @@ def main():
         course_bought.add_course_to_list(cart.get_buying_list(),user1.get_name())
     else:
         print("Payment Failed, Please try again")
-    '''
+
+    #addcourse
+    newcourse = Course(2,4.6,"math","Minecraft_Physics",5000)
+    catalog.add_course_to_list(newcourse)
+
+    #editcourse
+    catalog.edit_course("genre","science",catalog.course_list[-1])
+    print(catalog.course_list[-1].get_genre())
+
+    #removecourse
+    '''for i in range (len(catalog.course_list)):
+        print(catalog.course_list[i].get_title())
+    print("agsasgasg")'''
+    catalog.remove_course_from_list(catalog.course_list[2])
+    '''for i in range (len(catalog.course_list)):
+        print(catalog.course_list[i].get_title())'''
+        
 main()

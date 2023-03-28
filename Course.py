@@ -20,6 +20,21 @@ class Course:
     
     def get_price(self):
         return self.__price
+    
+    def set_diff(self, diff):
+        self.__diff = diff
+
+    def set_duration(self, duration):
+        self.__duration = duration
+    
+    def set_genre(self, genre):
+        self.__genre = genre
+
+    def set_title(self, title):
+        self.__title = title
+
+    def set_price(self, price):
+        self.__price = price
 
 class CourseCatalog:
     def __init__(self):
@@ -27,6 +42,9 @@ class CourseCatalog:
 
     def add_course_to_list(self,Course):
         self.course_list.append(Course)
+
+    def remove_course_from_list(self,Course):
+        self.course_list.remove(Course)
 
     def search_by_diff(self,keyword):
         filtered_list = []
@@ -59,6 +77,19 @@ class CourseCatalog:
                 filtered_list.append(self.course_list[i])
 
         return filtered_list
+    
+    def edit_course(self,edit_type,data,Course):
+        match edit_type:
+            case "diff" :
+                Course.set_diff(data)
+            case "duration" :
+                Course.set_duration(data)
+            case "genre" :
+                Course.set_genre(data)
+            case "title" :
+                Course.set_title(data)
+            case "price" :
+                Course.set_price(data)
     
 class CourseBought(Course):
     def __init__(self, expired_date, progress,course_owner,diff,duration,genre,title,price):
