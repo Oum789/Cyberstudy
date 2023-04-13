@@ -3,8 +3,14 @@ class ShopCart:
         self.__total_price = total_price
         self.__buying_list = [] #list of Course Object
         
+    def get_total_price(self):
+        return self.__total_price
+
     def get_buying_list(self):
         return self.__buying_list
+    
+    def reset_buying_list(self):
+        self.__buying_list = []
 
     def add_to_cart(self,Course):
         price = Course.get_price()
@@ -20,9 +26,6 @@ class ShopCart:
         else:
             return 0    
 
-    def create_receipt():
-        pass
-
     def add_to_course_bought():
         pass
 
@@ -30,7 +33,7 @@ class Receipt:
     def __init__(self,receipt_payment,order_date,order):
         self.__receipt_payment = receipt_payment
         self.__order_date = order_date
-        self.__order = order #Payment Object
+        self.__order = order
 
     def save_receipt():
         pass
