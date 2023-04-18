@@ -10,4 +10,4 @@ class Membership():
         return self.__info
     
     def view_membership(self):
-        return [self.__tier,self.__info]
+        return {"Tier":self.__tier, "Info":self.__info}
