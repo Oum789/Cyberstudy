@@ -12,10 +12,10 @@ class ShopCart:
     def reset_buying_list(self):
         self.__buying_list = []
 
-    def add_to_cart(self,Course):
-        price = Course.get_price()
+    def add_to_cart(self,course):
+        price = course.get_price()
         self.update_price(price)
-        self.__buying_list.append(Course)
+        self.__buying_list.append(course)
 
     def update_price(self,price):
         self.__total_price += price

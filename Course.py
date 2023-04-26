@@ -44,11 +44,32 @@ class CourseCatalog:
     def __init__(self):
         self.course_list = [] #list of course object
 
-    def add_course_to_list(self,Course):
-        self.course_list.append(Course)
+    def admin_add_course_to_list(self,ids,diff,duration,genre,title,price):
+        checking = self.find_course(ids)
+        if checking == 0:
+            newcourse = Course(int(ids),int(diff),int(duration),genre,title,int(price))
+            self.course_list.append(newcourse)
+            return 1
+        else:
+            return 0
+    
+    def add_course_to_list(self,course):
+        self.course_list.append(course)
 
-    def remove_course_from_list(self,Course):
-        self.course_list.remove(Course)
+    def remove_course_from_list(self,course):
+        self.course_list.remove(course)
+
+    def edit_course_from_list(self,ids,diff,duration,genre,title,price):
+        old_course_info = self.find_course(ids)
+        if old_course_info == 0:
+            return 0
+        else:
+            old_course_info.set_diff(diff)
+            old_course_info.set_duration(duration)
+            old_course_info.set_genre(genre)
+            old_course_info.set_title(title)
+            old_course_info.set_price(price)
+            return 1
 
     def find_course(self,id):
         for i in self.course_list:

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lange="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search</title>
+</head>
+<body>
+    <h1>Search</h1>
+    <h3>Search Title</h3>
+    <form action="/search_title" method="post">
+        <label>Enter Keyword</label>
+        <input type="text" name="keyword"><br/>
+        <input type="submit">
+    </form>
+
+    <h3>Search Diff</h3>
+    <form action="/search_diff" method="post">
+        <label>Enter Difficulty Level</label>
+        <input type="number" name="diff"><br/>
+        <input type="submit">
+    </form>
+
+    <h3>Search Genre</h3>
+    <form action="/search_genre" method="post">
+        <select name="genre">
+            <option value="" disabled="disabled" selected="selected">Please select a name</option>
+            <option value="science">Science</option>
+            <option value="business">Business</option>
+            <option value="entertain">Entertain</option>
+            <option value="math">Math</option>
+        </select>
+        <input type="submit">
+    </form>
+
+    <h3>Search Duration</h3>
+    <form action="/search_duration" method="post">
+        <label>Max duration</label>
+        <input type="number" name="duration_max"><br/>
+        <label>Min duration</label>
+        <input type="number" name="duration_min"><br/>
+        <input type="submit">
+    </form>
+</body>
+</html>

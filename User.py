@@ -38,6 +38,6 @@ class UserList:
         for i in range (len(self.__user_list)):
             user = self.__user_list[i]
             if mail == user.get_email() and pw == user.get_password():
-                return "Login Successful"
-        return "Your password or username is not correct"
+                return 1
+        return 0
     

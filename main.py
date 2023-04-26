@@ -2,9 +2,12 @@ from Course import CourseCatalog, Course, CourseBoughtCatalog
 from User import User, UserList
 from Payment import ShopCart,Receipt
 
-from fastapi import FastAPI
+from fastapi import FastAPI,Body,Request,File,UploadFile,Form,status
+from fastapi.responses import HTMLResponse,RedirectResponse
+from fastapi.templating import Jinja2Templates
 
 '''def main():'''
+templates = Jinja2Templates(directory='htmldirectory')
 
 app = FastAPI()
 
@@ -80,12 +83,52 @@ user_list.add_user_to_list(user3)
 # for i in range (len(catalog.course_list)):
 #     print(catalog.course_list[i].get_title())
 
-@app.post("/login")
-async def login(data: dict) -> dict:
-    email = data["email"]
-    password = data["password"]
-    status = user_list.check_password(email,password)
-    return {"status":status}
+#Templates
+@app.get("/login", response_class=HTMLResponse)
+def login(request: Request):
+    return templates.TemplateResponse("login.html",context={"request": request})
+
+@app.get("/search", response_class=HTMLResponse)
+def search(request: Request):
+    return templates.TemplateResponse("search.html",context={"request": request})
+
+@app.get("/jail")
+def jail(request: Request):  
+    return templates.TemplateResponse('jail.html', context={'request': request})
+
+@app.get("/home_page")
+def home_page(request: Request):  
+    return templates.TemplateResponse('home_page.html', context={'request': request})
+
+@app.get("/payment")
+def payment(request: Request):  
+    return templates.TemplateResponse('payment.html', context={'request': request,"statuss":""})
+
+@app.get("/admin")
+def admin(request: Request):
+    return templates.TemplateResponse("admin.html",context={"request": request,"status_add_course":"","status_remove_course":"","status_edit_course":""})
+
+#Method Endpoints
+@app.post("/checkpass")
+async def login(request: Request, email : str = Form(None),password : str = Form(None)):
+    statuss = user_list.check_password(email,password)  
+    if statuss == 1:
+        # return templates.TemplateResponse('home_page.html', context={'request': request, 'result': "Login Successful"})
+        redirect_url = request.url_for('home_page')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    # "Login Successful"
+    if statuss == 0:
+        # return templates.TemplateResponse('jail.html', context={'request': request, 'result': "Your password or username is not correct"})
+        redirect_url = request.url_for('jail')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    # "Your password or username is not correct"
+
+@app.post('/back')
+async def add(request: Request):
+    redirect_url = request.url_for('login')    
+    return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+
+# return {"status":status}
 
 # testcase login
 # {"email":"qwertyuiop@gmail.com",
@@ -93,17 +136,16 @@ async def login(data: dict) -> dict:
 
 
 @app.post("/add_course")
-async def add_course(data: dict) -> dict:
-    ids = data["id"]
-    diff = data["diff"]
-    duration = data["duration"]
-    genre = data["genre"]
-    title = data["title"]
-    price = data["price"]
-    newcourse = Course(ids,diff,duration,genre,title,price)
-    catalog.add_course_to_list(newcourse)
-    # print(catalog.course_list[-1].get_title())
-    return {"status": "Course_Added"}
+async def add_course(request: Request, ids : str = Form(None),diff : str = Form(None),duration : str = Form(None),genre : str = Form(None),title : str = Form(None),price : str = Form(None)):
+    if ids == None or diff == None or duration == None or genre == None or title == None or price == None:
+        redirect_url = request.url_for('admin')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    else:
+        check = catalog.admin_add_course_to_list(int(ids),diff,int(duration),genre,title,int(price))
+        if check == 0:
+            return templates.TemplateResponse("admin.html",context={"request": request,"status_add_course": "ID already taken"})
+        else:
+            return templates.TemplateResponse("admin.html",context={"request": request,"status_add_course": "Course Added"})
 
 # testcase add_course
 # {"id":123456,
@@ -114,66 +156,91 @@ async def add_course(data: dict) -> dict:
 #  "price":5000}
 
 @app.post("/remove_course")
-async def remove_course(data: dict) -> dict:
-    ids = data["id"]
-    course_selected = catalog.find_course(ids)
-    if course_selected == 0:
-        status = "Course_id_not_found"
+async def remove_course(request: Request, ids : str = Form(None)):
+    if ids == None:
+        redirect_url = request.url_for('admin')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     else:
-        catalog.remove_course_from_list(course_selected)
-        status = "Course_removed"
-    
+        course_selected = catalog.find_course(int(ids))
+        if course_selected == 0:
+            return templates.TemplateResponse("admin.html",context={"request": request,"status_remove_course": "ID not found"})
+        else:
+            catalog.remove_course_from_list(course_selected)
+            return templates.TemplateResponse("admin.html",context={"request": request,"status_remove_course": "Course Removed"})
     # print(catalog.course_list[-1].get_title())
-    return {"status":status}
 
 # testcase remove_course
 # {"id":123456}
 
+@app.post("/edit_course")
+async def edit_course(request: Request, ids : str = Form(None),diff : str = Form(None),duration : str = Form(None),genre : str = Form(None),title : str = Form(None),price : str = Form(None)):
+    if ids == None or diff == None or duration == None or genre == None or title == None or price == None:
+        redirect_url = request.url_for('admin')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    else:
+        check = catalog.edit_course_from_list(int(ids),diff,int(duration),genre,title,int(price))
+        if check == 0:
+            return templates.TemplateResponse("admin.html",context={"request": request,"status_edit_course": "ID not found"})
+        else:
+            return templates.TemplateResponse("admin.html",context={"request": request,"status_edit_course": "Course Editted"})
+
 @app.post("/search_title")
-async def search_title(data: dict) -> dict:
-    title = data["title"]
-    result = catalog.search_by_title(title)
-    if result == {}:
-        return {"status":"NOT FOUND"}
-    else :
-        return result
+async def search_title(request:Request,keyword : str = Form(None)):
+    if keyword == None:
+        redirect_url = request.url_for('search')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    else:
+        result = catalog.search_by_title(keyword)
+        if result == {}:
+            return {}
+        else :
+            return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
+    
 
 # testcase search_title
 # {"title":"A"}
 
 @app.post("/search_diff")
-async def search_diff(data: dict) -> dict:
-    diff = data["diff"]
-    result = catalog.search_by_diff(diff)
-    if result == {}:
-        return {"status":"NOT FOUND"}
-    else :
-        return result
+async def search_diff(request:Request,diff : str = Form(None)):
+    if diff == None:
+        redirect_url = request.url_for('search')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    else:
+        result = catalog.search_by_diff(int(diff))
+        if result == {}:
+            return {}
+        else :
+            return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
 
 # testcase search_diff
 # {"diff":2}
 
 @app.post("/search_genre")
-async def search_genre(data: dict) -> dict:
-    genre = data["genre"]
-    result = catalog.search_by_genre(genre)
-    if result == {}:
-        return {"status":"NOT FOUND"}
-    else :
-        return result
+async def search_genre(request:Request,genre : str = Form(None)):
+    if genre == None:
+        redirect_url = request.url_for('search')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    else:
+        result = catalog.search_by_genre(genre)
+        if result == {}:
+            return {}
+        else :
+            return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
 
 # testcase search_genre
 # {"genre":"science"}
 
 @app.post("/search_duration")
-async def search_duration(data: dict) -> dict:
-    duration_min = data["min"]
-    duration_max = data["max"]
-    result = catalog.search_by_duration(duration_min,duration_max)
-    if result == {}:
-        return {"status":"NOT FOUND"}
-    else :
-        return result
+async def search_duration(request:Request,duration_min : str = Form(None),duration_max : str = Form(None)):
+    if duration_min == None or duration_max == None:
+        redirect_url = request.url_for('search')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    else:
+        result = catalog.search_by_duration(int(duration_min),int(duration_max))
+        if result == {}:
+            return {}
+        else :
+            return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
 
 # testcase search_duration
 # {"min":1,
@@ -181,24 +248,25 @@ async def search_duration(data: dict) -> dict:
 
 cart.add_to_cart(catalog.course_list[2])
 cart.add_to_cart(catalog.course_list[3])
+print(cart.get_total_price())
 
-@app.post("/payment")
-async def pay(data:dict) -> dict:
-    money = data["money"]
-    username = data["username"]
-    total_price = cart.get_total_price()
-    if money == total_price:
-        user = user_list.find_user(username)
-        course_bought.add_course_to_list(cart.get_buying_list(),user.get_name())
-        receipt = Receipt("receipt_pic.png","order_date",1)
-        user.add_receipt_to_list(receipt)
-        print(user.get_receipt())
-        print(course_bought.get_list())
-        cart.reset_buying_list()
-        return {"status":"Payment Complete"}
+@app.post("/paying")
+async def pay(request:Request,username : str = Form(None),money : str = Form(None)):
+    if username == None or money == None:
+        redirect_url = request.url_for('payment')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     else:
-        return {"status":"Payment Failed"}
-
-# testcase payment    
+        total_price = cart.get_total_price()
+        if int(money) == int(total_price) and user_list.find_user(username) != 0:
+            user = user_list.find_user(username)
+            course_bought.add_course_to_list(cart.get_buying_list(),user.get_name())
+            receipt = Receipt("receipt_pic.png","order_date",1)
+            user.add_receipt_to_list(receipt)
+            cart.reset_buying_list()
+            return templates.TemplateResponse('payment_status.html', context={'request': request, "statuss":"Successful"})
+        else:
+            return templates.TemplateResponse('payment.html', context={'request': request, "statuss":"Please insert correct amount of money and username"})
+        
+# testcase payment
 # {"money":2234,
 #  "username":"Rimi"}
