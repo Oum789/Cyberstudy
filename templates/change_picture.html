@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lange="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CHANGE PICTURE</title>
+</head>
+<body>
+    <h1>Change Picture</h1>
+    <p><img src="data:image/jpeg;base64,{{ picture | safe }}" width="250" height="250"></p>
+    <form action="/change_picture" method="post" enctype="multipart/form-data">
+        <label for="file">Choose image to upload</label>
+        <input type="file" id="picture" name="picture"><br> 
+        <button type="submit">Upload</button>
+    </form>
+    <p>Result: {{ status }}</p><br>
+    <p><button onClick="location.href='/view_profile'">Back to Home</button></p>
+</body>
+</html>

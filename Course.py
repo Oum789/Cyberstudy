@@ -50,11 +50,11 @@ class CourseCatalog:
     def remove_course_from_list(self,Course):
         self.course_list.remove(Course)
         
-    # def find_course(self,id):
-    #     for i in self.course_list:
-    #         if i.get_id() == id:
-    #             return i
-    #     return 0
+    def find_course(self,id):
+        for i in self.course_list:
+            if i.get_id() == id:
+                return i
+        return 0
 
     # def search_by_diff(self,keyword):
     #     filtered_list = []
@@ -133,15 +133,14 @@ class CourseBoughtCatalog:
         pass
 
     def view_bought_course(self):
-        output_list = []
-        i = 0   
+        my_course = {}
+        i = 1   
         for j in self.__course_owned:
-            output_list.append([])
-            output_list[i].append(j.get_title())
-            output_list[i].append(j.get_expired_date())
-            output_list[i].append(j.get_progress())
-            output_list[i].append(j.get_course_owner().get_name())
+            my_dict = {}
+            my_dict["name"] = j.get_title()
+            my_dict["exp"] = j.get_expired_date()
+            my_dict["progress"] = j.get_progress()
+            my_dict["owner"] = j.get_course_owner().get_name()
+            my_course[i] = my_dict
             i = i + 1
-        
-        return {"Your Course" : output_list}
-
+        return my_course
