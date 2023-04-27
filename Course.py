@@ -88,6 +88,7 @@ class CourseCatalog:
                 course_dict["difficulty"] = self.course_list[i].get_diff()
                 course_dict["duration"] = self.course_list[i].get_duration()
                 course_dict["price"] = self.course_list[i].get_price()
+                course_dict["id"] = self.course_list[i].get_id()
                 filtered_dict[counter] = course_dict
                 counter+=1
 
@@ -104,6 +105,7 @@ class CourseCatalog:
                 course_dict["difficulty"] = self.course_list[i].get_diff()
                 course_dict["duration"] = self.course_list[i].get_duration()
                 course_dict["price"] = self.course_list[i].get_price()
+                course_dict["id"] = self.course_list[i].get_id()
                 filtered_dict[counter] = course_dict
                 counter+=1
 
@@ -120,6 +122,7 @@ class CourseCatalog:
                 course_dict["difficulty"] = self.course_list[i].get_diff()
                 course_dict["duration"] = self.course_list[i].get_duration()
                 course_dict["price"] = self.course_list[i].get_price()
+                course_dict["id"] = self.course_list[i].get_id()
                 filtered_dict[counter] = course_dict
                 counter+=1
 
@@ -136,6 +139,7 @@ class CourseCatalog:
                 course_dict["difficulty"] = self.course_list[i].get_diff()
                 course_dict["duration"] = self.course_list[i].get_duration()
                 course_dict["price"] = self.course_list[i].get_price()
+                course_dict["id"] = self.course_list[i].get_id()
                 filtered_dict[counter] = course_dict
                 counter+=1
 

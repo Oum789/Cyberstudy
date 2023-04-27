@@ -29,6 +29,21 @@ class ShopCart:
     def add_to_course_bought():
         pass
 
+    def view_cart(self):
+        counter = 0
+        result = {}
+        for i in range (len(self.get_buying_list())):
+            course_dict = {}
+            course_dict["title"] = self.__buying_list[i].get_title()
+            course_dict["genre"] = self.__buying_list[i].get_genre()
+            course_dict["difficulty"] = self.__buying_list[i].get_diff()
+            course_dict["duration"] = self.__buying_list[i].get_duration()
+            course_dict["price"] = self.__buying_list[i].get_price()
+            course_dict["id"] = self.__buying_list[i].get_id()
+            result[counter] = course_dict
+            counter+=1
+
+        return result
 class Receipt:
     def __init__(self,receipt_payment,order_date,order):
         self.__receipt_payment = receipt_payment

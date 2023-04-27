@@ -16,6 +16,7 @@ catalog = CourseCatalog()
 cart = ShopCart(0)
 course_bought = CourseBoughtCatalog()
 
+login_status = 0
 #init course
 course1 = Course(177013,1,2.46,"business","AMOGUS",0)
 catalog.add_course_to_list(course1)
@@ -109,11 +110,71 @@ def admin(request: Request):
     return templates.TemplateResponse("admin.html",context={"request": request,"status_add_course":"","status_remove_course":"","status_edit_course":""})
 
 #Method Endpoints
+@app.post("/course")
+async def course(request: Request, ids : str = Form(None)):
+    course = catalog.find_course(int(ids))
+    diff = course.get_diff()
+    duration = course.get_duration()
+    genre = course.get_genre()
+    title = course.get_title()
+    price = course.get_price()
+    id_dict = {0:ids}
+    print(id_dict)
+    return templates.TemplateResponse("view_course.html",context={"request": request,
+                                                                  "cart_message":"",
+                                                                  "diff":diff,
+                                                                  "duration":duration,
+                                                                  "genre":genre,
+                                                                  "title":title,
+                                                                  "price":price,
+                                                                  "ids":id_dict})
+
+@app.post("/course_guest")
+async def course(request: Request, ids : str = Form(None)):
+    course = catalog.find_course(int(ids))
+    diff = course.get_diff()
+    duration = course.get_duration()
+    genre = course.get_genre()
+    title = course.get_title()
+    price = course.get_price()
+    id_dict = {0:ids}
+    print(id_dict)
+    return templates.TemplateResponse("view_course_guest.html",context={"request": request,
+                                                                  "cart_message":"",
+                                                                  "diff":diff,
+                                                                  "duration":duration,
+                                                                  "genre":genre,
+                                                                  "title":title,
+                                                                  "price":price,
+                                                                  "ids":id_dict})
+
+@app.post("/add_to_cart")
+def add_to_cart(request: Request, ids : str = Form(None)):
+    course = catalog.find_course(int(ids))
+    cart.add_to_cart(course)
+    # print(cart.__buying_list)
+    diff = course.get_diff()
+    duration = course.get_duration()
+    genre = course.get_genre()
+    title = course.get_title()
+    price = course.get_price()
+    id_dict = {0:ids}
+    print(id_dict)
+    return templates.TemplateResponse("view_course.html",context={"request": request,
+                                                                  "cart_message":"Added to cart",
+                                                                  "diff":diff,
+                                                                  "duration":duration,
+                                                                  "genre":genre,
+                                                                  "title":title,
+                                                                  "price":price,
+                                                                  "ids":id_dict})
+
 @app.post("/checkpass")
 async def login(request: Request, email : str = Form(None),password : str = Form(None)):
     statuss = user_list.check_password(email,password)  
     if statuss == 1:
         # return templates.TemplateResponse('home_page.html', context={'request': request, 'result': "Login Successful"})
+        login_status = 1
         redirect_url = request.url_for('home_page')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     # "Login Successful"
@@ -184,6 +245,14 @@ async def edit_course(request: Request, ids : str = Form(None),diff : str = Form
         else:
             return templates.TemplateResponse("admin.html",context={"request": request,"status_edit_course": "Course Editted"})
 
+@app.get("/view_cart")
+async def view_shopcart(request:Request):
+    result = cart.view_cart()
+    if result == {}:
+        return {}
+    else :
+        return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
+    
 @app.post("/search_title")
 async def search_title(request:Request,keyword : str = Form(None)):
     if keyword == None:
