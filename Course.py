@@ -1,11 +1,12 @@
 class Course:
-    def __init__(self,ids,diff,duration,genre,title,price):
+    def __init__(self,ids,diff,duration,genre,title,price,detail):
         self.__id = ids
         self.__diff = diff
         self.__duration = duration
         self.__genre = genre
         self.__title = title
         self.__price = price
+        self.__detail = detail
     
     def get_id(self):
         return self.__id
@@ -25,6 +26,9 @@ class Course:
     def get_price(self):
         return self.__price
     
+    def get_detail(self):
+        return self.__detail
+    
     def set_diff(self, diff):
         self.__diff = diff
 
@@ -39,6 +43,9 @@ class Course:
 
     def set_price(self, price):
         self.__price = price
+
+    def set_detail(self,detail):
+        self.__detail = detail
 
 class CourseCatalog:
     def __init__(self):
@@ -180,10 +187,12 @@ class CourseBoughtCatalog:
     def __init__(self):
         self.__course_owned = [] #list of CourseBought Object
 
-    def add_course_to_list(self,Course,username):
-        for i in range (len(Course)):
-            Course[i] = CourseBought("expired_date",0,username,Course[i].get_id(),Course[i].get_diff(),Course[i].get_duration(),Course[i].get_genre(),Course[i].get_title(),Course[i].get_price())
-            self.__course_owned.append(Course[i])
+    def add_course_to_list(self,course,username):
+        for i in range (len(course)):
+            course[i] = CourseBought("expired_date",0,username,course[i].get_id(),course[i].get_diff(),
+                                     course[i].get_duration(),course[i].get_genre(),course[i].get_title(),course[i].get_price())
+            self.__course_owned.append(course[i])
+            print("added")
 
     def get_list(self):
         return self.__course_owned
@@ -193,4 +202,16 @@ class CourseBoughtCatalog:
 
     def activate_course():
         pass
-            
+        
+    def view_bought_course(self):
+        my_course = {}
+        i = 1   
+        for j in self.__course_owned:
+            my_dict = {}
+            my_dict["name"] = j.get_title()
+            my_dict["exp"] = j.get_expired_date()
+            my_dict["progress"] = j.get_progress()
+            my_dict["owner"] = j.get_course_owner()
+            my_course[i] = my_dict
+            i = i + 1
+        return my_course

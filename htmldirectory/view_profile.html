@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lange="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PROFILE</title>
+</head>
+<body>
+<h1>My Profile</h1>
+<h2>
+    <p><img src="data:image/jpeg;base64,{{ picture | safe }}" width="250" height="250"></p>
+    <button onClick="location.href='/change_picture'">Change Picture</button><br>
+    Name    :  {{name}}<button onClick="location.href='/change_username'">Change Username</button><br>
+    Email   :  {{email}}<button onClick="location.href='/change_email'">Change Email</button><br>
+    Password:  {{password}}<button onClick="location.href='/change_password'">Change Password</button><br>
+</h2>
+<p><button onClick="location.href='/home'">Back to Home</button></p>
+</body>
+</html>

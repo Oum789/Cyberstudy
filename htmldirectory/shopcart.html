@@ -1,10 +1,20 @@
 <div>
-    <h1>Here is your result</h1>
-    <form action="/home_page">
+    <h1>Your Shop Cart</h1>
+    <form action="/home">
         <button type="submit">Back to Home</button><br/>
     </form>
     
     {% for i in result %}
-        {% include "box_template.html" %}
+        {% include "box_shop_template.html" %}
     {% endfor %}
+
+    <h1>Total Price : {{price}}</h1>
+    {% if result == {} %}
+    <h1>Why don't go buy something?</h1>
+
+    {% else %}
+    <form action="/payment">
+        <button type="submit">Purchase</button><br/>
+    </form>
+    {% endif %}
 </div>

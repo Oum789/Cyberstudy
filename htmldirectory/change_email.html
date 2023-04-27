@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lange="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CHANGE EMAIL</title>
+</head>
+<body>
+    <h1>Change Email</h1>
+    <form action="/change_email" method="post">
+        <label for="input">New Email</label><br>
+        <input type="text" name="new_email"><br>
+        <label for="input">Password</label><br>
+        <input type="password" name="password"><br> 
+        <button type="submit">Change Email</button>
+    </form>
+    <p>Result: {{ status }}</p><br>
+    <p><button onClick="location.href='/view_profile'">Back to Profile</button></p>
+</body>
+</html>

@@ -1,10 +1,19 @@
 from Course import CourseCatalog, Course, CourseBoughtCatalog
 from User import User, UserList
 from Payment import ShopCart,Receipt
+from System import System
 
 from fastapi import FastAPI,Body,Request,File,UploadFile,Form,status
 from fastapi.responses import HTMLResponse,RedirectResponse
 from fastapi.templating import Jinja2Templates
+
+import json
+from Course import CourseCatalog, Course, CourseBoughtCatalog
+from typing import Optional
+from fastapi import FastAPI, Request, Form, status, HTTPException, UploadFile, File
+from fastapi.staticfiles import StaticFiles
+import re
+import base64
 
 '''def main():'''
 templates = Jinja2Templates(directory='htmldirectory')
@@ -16,73 +25,148 @@ catalog = CourseCatalog()
 cart = ShopCart(0)
 course_bought = CourseBoughtCatalog()
 
-login_status = 0
 #init course
-course1 = Course(177013,1,2.46,"business","AMOGUS",0)
+course1 = Course(177013,1,2.46,"business","AMOGUS",0,"Teach you about how to be a successful imposter")
 catalog.add_course_to_list(course1)
 
-course2 = Course(555,1,3.18,"entertain","A",1000)
+course2 = Course(555,1,3.18,"entertain","A",1000,"English Alphabet but only the first one")
 catalog.add_course_to_list(course2)
 
-course3 = Course(2000,1,1.12,"entertain","B",1234)
+course3 = Course(2000,1,1.12,"entertain","B",1234,"Extension from A, now we learn about 2nd character")
 catalog.add_course_to_list(course3)
 
-course4 = Course(1,2,4.13,"math","THIS_IS_NAME",1000)
+course4 = Course(1,2,4.13,"math","THIS_IS_NAME",1000,"Q#(&T)*T#WYB*)OB T($*OL#QYTBBV$QWBO) (Math is hard but my pen is Harder)")
 catalog.add_course_to_list(course4)
 
-course5 = Course(777,2,4.6,"science","GENSHIN_BAD",500)
+course5 = Course(777,2,4.6,"science","GENSHIN_BAD",500,"Go touch some grass idiot")
 catalog.add_course_to_list(course5)
 
 #init user
-user1 = User("Bank","qwertyuiop@gmail.com","ASDFJKL")
+user1 = User(0,"Bank","qwertyuiop@gmail.com","ASDFJKL")
 user_list.add_user_to_list(user1)
 
-user2 = User("Fubuki","a@gmail.com","amogus")
+user2 = User(0,"Fubuki","a@gmail.com","amogus")
 user_list.add_user_to_list(user2)
 
-user3 = User("Rimi","iLoveShrek@gmail.com","passworD")
+user3 = User(0,"Rimi","iLoveShrek@gmail.com","passworD")
 user_list.add_user_to_list(user3)
 
-#searchCourse
-# result = catalog.search_by_title("A")
-# if result == []:
-#     print("NOT FOUND")
-# else :
-#     print(result)
+guest = User(0,"Guest","","")
 
-# #login
-# def login(email,password):
-#     status = user_list.check_password(email,password)
-#     print(status)
+#System
+system = System(guest,False)
+profile_picture = None 
 
-# #payment
-# cart.add_to_cart(catalog.course_list[2])
-# cart.add_to_cart(catalog.course_list[3])
-# check_money = cart.initiate_payment(2234)
+@app.get("/home", response_class=HTMLResponse)
+async def home_tem(request: Request):    
+    return templates.TemplateResponse("home.html", {"request": request, "username": system.get_user_now().get_name(), "login_status": system.get_login_status(), "catalog": catalog.course_list})
 
-# if check_money == 1:
-#     print("Payment Successful")
-#     course_bought.add_course_to_list(cart.get_buying_list(),user1.get_name())
-#     receipt = Receipt("receipt_pic.png","order_date",1)
-#     user1.add_receipt_to_list(receipt)
-# else:
-#     print("Payment Failed, Please try again")
+@app.post("/home", response_class=HTMLResponse)
+async def home(request: Request, ids : str = Form(None)):    
+    return templates.TemplateResponse("view_course.html", {"request": request, "ids": ids})
 
-# #addcourse
-# newcourse = Course(2,4.6,"math","Minecraft_Physics",5000)
-# catalog.add_course_to_list(newcourse)
+@app.get("/logout", response_class=HTMLResponse)
+async def logout(request: Request): 
+    system.set_login_status(False)
+    return templates.TemplateResponse("home.html", {"request": request, "username": system.get_user_now().get_name(), "login_status": system.get_login_status()})
 
-# #editcourse
-# catalog.edit_course("genre","science",catalog.course_list[-1])
-# print(catalog.course_list[-1].get_genre())
 
-# #removecourse
-# for i in range (len(catalog.course_list)):
-#     print(catalog.course_list[i].get_title())
-# print("agsasgasg")
-# catalog.remove_course_from_list(catalog.course_list[2])
-# for i in range (len(catalog.course_list)):
-#     print(catalog.course_list[i].get_title())
+@app.get("/view_profile", response_class=HTMLResponse)
+async def view_profile_tem(request: Request):
+    profile = system.get_user_now().view_profile()
+    return templates.TemplateResponse("view_profile.html", {"request": request, "picture": profile["picture"], "name": profile["name"], "email": profile["email"], "password": profile["password"]})
+
+@app.get("/view_course_bought", response_class=HTMLResponse)
+async def view_course_bought_tem(request: Request):
+    my_course = course_bought.view_bought_course()
+    return templates.TemplateResponse("view_course_bought.html", {"request": request, "my_course": my_course})
+
+@app.get("/change_picture", response_class=HTMLResponse)
+async def change_picture_tem(request: Request):
+    return templates.TemplateResponse("change_picture.html", {"request": request})
+
+@app.post("/change_picture", response_class=HTMLResponse)
+async def change_picture(request: Request, picture: UploadFile = Form(None)):
+    if picture == None:    
+        return templates.TemplateResponse("change_picture.html", {"request": request, "picture": changed_picture, "status": "Please Input Your Data"})
+    else:    
+        print(picture)
+        try:
+            contents = picture.file.read()
+            with open("uploaded_" + picture.filename, "wb") as f:
+                f.write(contents)
+        except Exception:
+                return {"message": "There was an error uploading the file"}
+        finally:
+            picture.file.close()
+        
+        changed_picture = base64.b64encode(contents).decode("utf-8")    
+        system.get_user_now().change_picture(changed_picture)    
+        return templates.TemplateResponse("change_picture.html", {"request": request, "picture": changed_picture, "status": "Your picture has been changed"})
+
+@app.get("/change_username", response_class=HTMLResponse)
+async def change_username_tem(request: Request):
+    return templates.TemplateResponse("change_username.html", {"request": request})
+
+@app.post("/change_username", response_class=HTMLResponse)
+async def change_username(request: Request, new_username: str = Form(None), password: str = Form(None)):
+    if new_username == None or password == None:
+        return templates.TemplateResponse("change_username.html", {"request": request, "status": "ERROR : Please Input Your Data"})
+    else:
+        user_change_status = system.get_user_now().change_username(new_username, user_list, password)
+        return templates.TemplateResponse("change_username.html", {"request": request, "status": user_change_status["status"]})
+
+@app.get("/change_email", response_class=HTMLResponse)
+async def change_email_tem(request: Request):
+    return templates.TemplateResponse("change_email.html", {"request": request})
+
+@app.post("/change_email", response_class=HTMLResponse)
+async def change_email(request: Request, new_email: str = Form(None), password: str = Form(None)):
+    if new_email == None or password == None:
+        return templates.TemplateResponse("change_email.html", {"request": request, "status": "ERROR : Please Input Your Data"})
+    else:
+        email_change_status = system.get_user_now().change_email(new_email, user_list, password)
+        return templates.TemplateResponse("change_email.html", {"request": request, "status": email_change_status["status"]})
+
+@app.get("/change_password", response_class=HTMLResponse)
+async def change_password_tem(request: Request):
+    return templates.TemplateResponse("change_password.html", {"request": request})
+
+@app.post("/change_password", response_class=HTMLResponse)
+async def change_password(request: Request, old_password: str = Form(None), new_password: str = Form(None)):
+    if old_password == None or new_password == None:
+        return templates.TemplateResponse("change_password.html", {"request": request, "status": "ERROR : Please Input Your Data"})
+    else:
+        password_change_status = system.get_user_now().change_password(new_password, old_password)
+        return templates.TemplateResponse("change_password.html", {"request": request, "status": password_change_status["status"]})
+
+@app.get("/register", response_class=HTMLResponse)
+async def register_tem(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
+
+@app.post("/register", response_class=HTMLResponse)
+async def register(request: Request, picture: UploadFile = Form(None), username: str = Form(None), email: str = Form(None), password: str = Form(None), con_password: str = Form(None)):
+    if picture == None or username == None or email == None or password == None or con_password == None  :
+        return templates.TemplateResponse("register.html", {"request": request, "status": "ERROR : Please Input Your Data"})
+    else:
+        try:
+            contents = picture.file.read()
+            with open("uploaded_" + picture.filename, "wb") as f:
+                f.write(contents)
+        except Exception:
+            return {"message": "There was an error uploading the file"}
+        finally:
+            picture.file.close()
+    
+        profile_picture = base64.b64encode(contents).decode("utf-8")
+        result = user_list.register(profile_picture, username, email, password, con_password)
+
+        if result["status"] == "register successfully":
+            redirect_url = request.url_for('login')
+            return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+        else:
+            return templates.TemplateResponse("register.html", {"request": request, "status": result["status"]})
+
 
 #Templates
 @app.get("/login", response_class=HTMLResponse)
@@ -96,10 +180,6 @@ def search(request: Request):
 @app.get("/jail")
 def jail(request: Request):  
     return templates.TemplateResponse('jail.html', context={'request': request})
-
-@app.get("/home_page")
-def home_page(request: Request):  
-    return templates.TemplateResponse('home_page.html', context={'request': request})
 
 @app.get("/payment")
 def payment(request: Request):  
@@ -118,71 +198,85 @@ async def course(request: Request, ids : str = Form(None)):
     genre = course.get_genre()
     title = course.get_title()
     price = course.get_price()
+    detail = course.get_detail()
     id_dict = {0:ids}
     print(id_dict)
-    return templates.TemplateResponse("view_course.html",context={"request": request,
+    if system.get_login_status() == True:
+        return templates.TemplateResponse("view_course.html",context={"request": request,
                                                                   "cart_message":"",
                                                                   "diff":diff,
                                                                   "duration":duration,
                                                                   "genre":genre,
                                                                   "title":title,
                                                                   "price":price,
+                                                                  "detail":detail,
                                                                   "ids":id_dict})
-
-@app.post("/course_guest")
-async def course(request: Request, ids : str = Form(None)):
-    course = catalog.find_course(int(ids))
-    diff = course.get_diff()
-    duration = course.get_duration()
-    genre = course.get_genre()
-    title = course.get_title()
-    price = course.get_price()
-    id_dict = {0:ids}
-    print(id_dict)
-    return templates.TemplateResponse("view_course_guest.html",context={"request": request,
+    else:
+       return templates.TemplateResponse("view_course_guest.html",context={"request": request,
                                                                   "cart_message":"",
                                                                   "diff":diff,
                                                                   "duration":duration,
                                                                   "genre":genre,
                                                                   "title":title,
                                                                   "price":price,
+                                                                  "detail":detail,
                                                                   "ids":id_dict})
 
 @app.post("/add_to_cart")
 def add_to_cart(request: Request, ids : str = Form(None)):
     course = catalog.find_course(int(ids))
-    cart.add_to_cart(course)
-    # print(cart.__buying_list)
-    diff = course.get_diff()
-    duration = course.get_duration()
-    genre = course.get_genre()
-    title = course.get_title()
-    price = course.get_price()
-    id_dict = {0:ids}
-    print(id_dict)
-    return templates.TemplateResponse("view_course.html",context={"request": request,
+    check = cart.check_ids(ids)
+    print(check)
+    if check == 0:
+        diff = course.get_diff()
+        duration = course.get_duration()
+        genre = course.get_genre()
+        title = course.get_title()
+        price = course.get_price()
+        detail = course.get_detail()
+        id_dict = {0:ids}
+        return templates.TemplateResponse("view_course.html",context={"request": request,
+                                                                  "cart_message":"Course Already Added",
+                                                                  "diff":diff,
+                                                                  "duration":duration,
+                                                                  "genre":genre,
+                                                                  "title":title,
+                                                                  "price":price,
+                                                                  "detail":detail,
+                                                                  "ids":id_dict})
+    else:
+        cart.add_to_cart(course)
+        # print(cart.__buying_list)
+        diff = course.get_diff()
+        duration = course.get_duration()
+        genre = course.get_genre()
+        title = course.get_title()
+        price = course.get_price()
+        detail = course.get_detail()
+        id_dict = {0:ids}
+        print(id_dict)
+        return templates.TemplateResponse("view_course.html",context={"request": request,
                                                                   "cart_message":"Added to cart",
                                                                   "diff":diff,
                                                                   "duration":duration,
                                                                   "genre":genre,
                                                                   "title":title,
                                                                   "price":price,
+                                                                  "detail":detail,
                                                                   "ids":id_dict})
 
 @app.post("/checkpass")
 async def login(request: Request, email : str = Form(None),password : str = Form(None)):
-    statuss = user_list.check_password(email,password)  
-    if statuss == 1:
-        # return templates.TemplateResponse('home_page.html', context={'request': request, 'result': "Login Successful"})
-        login_status = 1
-        redirect_url = request.url_for('home_page')
-        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
-    # "Login Successful"
-    if statuss == 0:
-        # return templates.TemplateResponse('jail.html', context={'request': request, 'result': "Your password or username is not correct"})
+    user = user_list.check_password(email,password)  
+    if user == 0:
         redirect_url = request.url_for('jail')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
-    # "Your password or username is not correct"
+    else:
+        system.set_login_status(True)
+        system.set_user_now(user)
+        redirect_url = request.url_for('home')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+
 
 @app.post('/back')
 async def add(request: Request):
@@ -248,11 +342,9 @@ async def edit_course(request: Request, ids : str = Form(None),diff : str = Form
 @app.get("/view_cart")
 async def view_shopcart(request:Request):
     result = cart.view_cart()
-    if result == {}:
-        return {}
-    else :
-        return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
-    
+    price = cart.get_total_price()
+    return templates.TemplateResponse('shopcart.html', context={'request': request, 'result': result,'price':price})
+        
 @app.post("/search_title")
 async def search_title(request:Request,keyword : str = Form(None)):
     if keyword == None:
@@ -314,10 +406,6 @@ async def search_duration(request:Request,duration_min : str = Form(None),durati
 # testcase search_duration
 # {"min":1,
 #  "max":4}
-
-cart.add_to_cart(catalog.course_list[2])
-cart.add_to_cart(catalog.course_list[3])
-print(cart.get_total_price())
 
 @app.post("/paying")
 async def pay(request:Request,username : str = Form(None),money : str = Form(None)):

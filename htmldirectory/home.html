@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lange="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HOME</title>
+    <style>
+        .dropdown {
+        display: inline-block;
+        position: relative;
+        width: 100px;
+        }
+        .dropdown-content {
+        display: none;
+        position: absolute;
+        width: 100%;
+        overflow: auto;
+        box-shadow: 0px 10px 10px 0px rgba(0,0,0,0.4);
+        }
+        .dropdown:hover .dropdown-content {
+        display: block;
+        }
+        .dropdown-content a {
+        display: block;
+        color: #000000;
+        padding: 5px;
+        text-decoration: none;
+        }
+        .dropdown-content a:hover {
+        color: #FFFFFF;
+        background-color: #00A4BD;
+        }
+        .box {
+
+        background-color: lightgrey;
+        width: 300px;
+        border: 15px solid green;
+        padding: 50px;
+        margin: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Home</h1>
+    <div>
+        {% if login_status == True %}
+            <div class="dropdown">
+                <button>{{username}}</button>
+                <div class="dropdown-content">
+                <a href="/view_profile">Your Profile</a>
+                <a href="/view_course_bought">Your Course</a>
+                <a href="/search">Search</a>
+                <a href="/view_cart">View_cart</a>
+                <a href="/logout">Sign Out</a>
+                </div>
+            </div>
+        {% else %}
+            <div class="dropdown">
+                <button>Guest</button>
+                <div class="dropdown-content">
+                <a href="/login">Sign In</a>
+                <a href="/register">Register</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <div>
+        {% for i in catalog %}
+            <div class="box" style="width: 18rem;">
+                <h4 class="title">Title : {{i.get_title()}}</h4>
+                <p class="genre">Genre : {{i.get_genre()}}</p>
+                <p class="difficulty">Difficulty : {{i.get_diff()}}</p>
+                <p class="duration">Duration : {{i.get_duration()}}</p>
+                <p class="price">Price : {{i.get_price()}}</p>
+                <form action="/course" method="post">
+                    <button type="submit" name="ids" class="btn btn-primary btn-lg" value={{i.get_id()}}>View Details</button><br/>
+                </form>
+                <button >Add to Bookmark</button>
+            </div>
+        {% endfor %}
+        <p><button onClick="location.href='/home'">Back to Home</button></p>
+    </div>
+
+</body>
+</html>

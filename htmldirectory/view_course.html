@@ -9,12 +9,13 @@
 <h4>Difficulty : {{ diff }}</h4><br/>
 <h4>Duration : {{ duration }}</h4><br/>
 <h4>Genre : {{ genre }}</h4><br/>
+<p>Detail : {{ detail }}</p>
 <h3>Price : {{ price }}</h3><br/>
     <form action="/add_to_cart" method="post">
         <label>{{cart_message}}</label><br/>
         <button type="submit" name="ids" class="btn btn-primary btn-lg" value={{ids[0]}}>Add To Cart</button><br/>
     </form>
-    <form action="/home_page">
+    <form action="/home">
         <button type="submit">Back to Home</button><br/>
     </form>
 </body>

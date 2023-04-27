@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lange="en">
+<head>
+    <meta charset="UTF-8">
+    <title>REGISTER</title>
+</head>
+<body>
+    <h1>Register</h1>
+    <form action="/register" method="post" enctype="multipart/form-data">
+        <label for="file">Choose image to upload</label>
+        <input type="file" id="picture" name="picture"><br> 
+        <label for="input">Username</label><br>
+        <input type="text" name="username"><br>
+        <label for="input">Email</label><br>
+        <input type="text" name="email"><br> 
+        <label for="input">Password</label><br>
+        <input type="password" name="password"><br> 
+        <label for="input">Confirm Password</label><br>
+        <input type="password" name="con_password"><br> 
+        <button type="submit">Register</button>
+    </form>
+    <p>Result: {{ status }}</p><br>
+    <p><button onClick="location.href='/home'">Back to Home</button></p>
+</body>
+</html>

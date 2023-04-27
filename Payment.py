@@ -29,6 +29,12 @@ class ShopCart:
     def add_to_course_bought():
         pass
 
+    def check_ids(self,id):
+        for i in self.__buying_list:
+            if i.get_id() == int(id):
+                return 0
+        return 1
+    
     def view_cart(self):
         counter = 0
         result = {}
