@@ -5,6 +5,8 @@ class User:
         self.__name = name
         self.__email = email
         self.__password = password
+        self.__bookmark = []
+        self.__receipt_list = []
     
     def get_picture(self):
         return self.__picture
@@ -18,8 +20,36 @@ class User:
     def get_password(self):
         return self.__password
     
+    def get_bookmark(self):
+        return self.__bookmark
+    
+    def get_receipt(self):
+        return self.__receipt_list
+    
+    def add_to_bookmark(self, course):
+        self.__bookmark.append(course)
+
+    def check_bookmark(self, ids):
+        for i in self.__bookmark:
+            if i.get_id() == int(ids):
+                return 0
+        return 1
+    
+    def make_receipt(self, cart_list, total_price):
+        receipt = []
+        for j in cart_list:
+            my_dict = {}
+            my_dict["Title"] = j.get_title()
+            my_dict["Price"] = j.get_price()
+            receipt.append(my_dict)
+        receipt.append({"Total Price": total_price})
+        return receipt
+    
     def view_profile(self):
         return {"picture": self.get_picture(), "name": self.get_name(), "email": self.get_email(),"password": self.get_password()}
+    
+    def add_receipt_to_list(self,Receipt):
+        self.__receipt_list.append(Receipt)
     
     def change_password(self,new_password,old_password):
         password_pattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$"
@@ -68,23 +98,19 @@ class User:
     def change_picture(self, picture):
         self.__picture = picture
 
+
+
         
 
 
     
 class UserList:
     def __init__(self) -> None:
-        self.user_list = []
+        self.__user_list = []
 
     def add_user_to_list(self,User):
-        self.user_list.append(User)
+        self.__user_list.append(User)
 
-    # def check_password(self,mail,pw):
-    #     for i in range (len(self.user_list)):
-    #         user = self.user_list[i]
-    #         if mail == user.get_email() and pw == user.get_password():
-    #             return "Login Successful"
-    #     return "Your password or username is not correct"
     def register(self, picture, username, email, password, con_password):
         username_pattern = r'^(?![-._])(?!.*[_.-]{2})[\w.-]{6,30}(?<![-._])$'
         email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
@@ -107,3 +133,17 @@ class UserList:
             return {"status" : "invalid password -> \n1) Has minimum 8 characters in length. \n2) At least one uppercase English letter. \n3) At least one lowercase English letter. \n4) At least one digit."}
         elif password != con_password:
             return {"status" : "Two passwords doesn't match"}
+        
+    def find_user(self,name):
+        for i in self.__user_list:
+            username = i.get_name()
+            if username.find(name) > -1:
+                return i
+        return 0
+
+    def check_password(self,mail,pw):
+        for i in range (len(self.__user_list)):
+            user = self.__user_list[i]
+            if mail == user.get_email() and pw == user.get_password():
+                return user
+        return 0

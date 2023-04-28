@@ -1,0 +1,35 @@
+<html lange="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Complete!</title>
+    <style>
+        .box {
+            background-color: lightgrey;
+            width: 300px;
+            border: 15px solid green;
+            padding: 50px;
+            margin: 20px;
+          }
+        </style>
+</head>
+<body>
+    <h1><p>Payment {{statuss}}</p></h1>
+
+    <h3>**Capture this window for evidence**</h3>
+
+    <div class="box" style="width: 18rem;">
+    
+        {% for i in receipt %}
+        {% for j in i %}
+                    <h4>{{j}} : {{i[j]}}</h4>
+        {% endfor %}
+        {% endfor %}
+        
+    </div>
+    
+
+    <form action="/home">
+        <input type="submit" value="Back to home">
+    </form>
+</body>
+</html>

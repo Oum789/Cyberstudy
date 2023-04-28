@@ -1,0 +1,12 @@
+<div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h2 class="card-title">{{result[i]["title"]}}</h2>
+      <p class="card-text">Genre : {{result[i]["genre"]}}</p>
+      <p class="card-text">Difficulty : {{result[i]["diff"]}}</p>
+      <p class="card-text">Duration : {{result[i]["duration"]}}</p>
+      <h4 class="card-text">Price : {{result[i]["price"]}}</h4>
+      <form action="/course" method="post">
+        <button type="submit" name="ids" value={{result[i]["id"]}}>View Details</button><br/>
+      </form>
+    </div>
+</div>

@@ -1,0 +1,27 @@
+<div>
+    <h1>Your Shop Cart</h1>
+    <form action="/home">
+        <button type="submit">Back to Home</button><br/>
+    </form>
+    
+    {% if result != None %}
+    {% for i in result %}
+        {% include "box_shop_template.html" %}
+    {% endfor %}
+    {% else %}
+        <div><p>Cart is Empty</p></div>
+    {% endif %}
+    <h1>Total Price : {{price}}</h1>
+    
+    {% if result == {} %}
+    <h1>Why don't go buy something?</h1>
+
+    {% else %}
+    <form action="/clear_cart" method="POST">
+        <button type="submit">Clear Cart</button><br/>
+    </form>
+    <form action="/payment">
+        <button type="submit">Purchase</button><br/>
+    </form>
+    {% endif %}
+</div>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lange="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment</title>
+</head>
+<body>
+    <h1>Payment</h1>
+
+    <form action="/paying" method="post">
+        <label>Username</label>
+        <input type="text" name="username"><br/>
+        <label>Money Paid</label>
+        <input type="number" name="money"><br/>
+        <input type="submit">
+    </form>
+    <p>{{statuss}}</p>
+    <form action="/view_cart">
+        <input type="submit" value="Back to Cart">
+    </form>
+</body>
+</html>

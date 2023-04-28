@@ -1,0 +1,10 @@
+<div>
+    <h1>Here is your result</h1>
+    <form action="/home">
+        <button type="submit">Back to Home</button><br/>
+    </form>
+    
+    {% for i in result %}
+        {% include "box_template.html" %}
+    {% endfor %}
+</div>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lange="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hi Admin!</title>
+</head>
+<body>
+    <h1>Manage Course</h1>
+    <h3>Add course</h3>
+    <form action="/add_course" method="post">
+        <label>ID</label>
+        <input type="number" name="ids"><br/>
+        <label>Difficulty</label>
+        <input type="number" name="diff"><br/>
+        <label>Duration</label>
+        <input type="number" name="duration"><br/>
+        <label>Genre</label>
+        <input type="text" name="genre"><br/>
+        <label>Title</label>
+        <input type="text" name="title"><br/>
+        <label>Price</label>
+        <input type="number" name="price"><br/>
+        <input type="submit">
+        <label> {{status_add_course}}</label>
+    </form>
+    <h3>Remove course</h3>
+    <form action="/remove_course" method="post">
+        <label>ID</label>
+        <input type="number" name="ids"><br/>
+        <input type="submit">
+        <label> {{status_remove_course}}</label>
+    </form>
+    <h3>Edit course</h3>
+    <form action="/edit_course" method="post">
+        <label>ID</label>
+        <input type="number" name="ids"><br/>
+        <label>Difficulty</label>
+        <input type="number" name="diff"><br/>
+        <label>Duration</label>
+        <input type="number" name="duration"><br/>
+        <label>Genre</label>
+        <input type="text" name="genre"><br/>
+        <label>Title</label>
+        <input type="text" name="title"><br/>
+        <label>Price</label>
+        <input type="number" name="price"><br/>
+        <input type="submit">
+        <label> {{status_edit_course}}</label>
+    </form>
+</body>
+</html>
