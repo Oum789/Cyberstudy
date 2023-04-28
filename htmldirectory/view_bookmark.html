@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lange="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MY BOOKMARK</title>
+    <style>
+    .box {
+
+        background-color: lightgrey;
+        width: 300px;
+        border: 15px solid green;
+        padding: 50px;
+        margin: 20px;
+      }
+    </style>
+</head>
+<body>
+<h1>My Bookmark</h1>
+<div>
+    {% if bookmark != None %}
+    {% for i in bookmark %}
+        <div class="box" style="width: 18rem;">
+            <h4 class="title">Title : {{i.get_title()}}</h4>
+            <p class="genre">Genre : {{i.get_genre()}}</p>
+            <p class="difficulty">Difficulty : {{i.get_diff()}}</p>
+            <p class="duration">Duration : {{i.get_duration()}}</p>
+            <p class="price">Price : {{i.get_price()}}</p>
+            <form action="/view_bookmark" method="post">
+                <button type="submit" name="ids" class="btn btn-primary btn-lg" value={{i.get_id()}}>Delete from Bookmark</button><br/>
+            </form>
+        </div>
+    {% else %}
+        <div><p>Bookmark is Empty</p></div>
+    {% endfor %}
+    {% endif %}
+    <p><button onClick="location.href='/home'">Back to Home</button></p>
+    
+</div>
+</body>

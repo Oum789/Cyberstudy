@@ -30,7 +30,6 @@
         background-color: #00A4BD;
         }
         .box {
-
         background-color: lightgrey;
         width: 300px;
         border: 15px solid green;
@@ -47,10 +46,13 @@
             <div class="dropdown">
                 <button>{{username}}</button>
                 <div class="dropdown-content">
-                <a href="/view_profile">Your Profile</a>
-                <a href="/view_course_bought">Your Course</a>
+                <a href="/view_profile">My Profile</a>
+                <a href="/view_course_bought">My Course</a>
+                <a href="/view_certificate">My Certificate</a>
+                <a href="/view_bookmark">My Bookmark</a>
+                <a href="/view_receipt">My receipt</a>
                 <a href="/search">Search</a>
-                <a href="/view_cart">View_cart</a>
+                <a href="/view_cart">My Cart</a>
                 <a href="/logout">Sign Out</a>
                 </div>
             </div>
@@ -58,6 +60,7 @@
             <div class="dropdown">
                 <button>Guest</button>
                 <div class="dropdown-content">
+                <a href="/search">Search</a>
                 <a href="/login">Sign In</a>
                 <a href="/register">Register</a>
                 </div>
@@ -75,10 +78,11 @@
                 <form action="/course" method="post">
                     <button type="submit" name="ids" class="btn btn-primary btn-lg" value={{i.get_id()}}>View Details</button><br/>
                 </form>
-                <button >Add to Bookmark</button>
+                <form action="/home" method="post">
+                    <button type="submit" name="ids" class="btn btn-primary btn-lg" value={{i.get_id()}}>Add to Bookmark</button><br/>
+                </form>
             </div>
         {% endfor %}
-        <p><button onClick="location.href='/home'">Back to Home</button></p>
     </div>
 
 </body>

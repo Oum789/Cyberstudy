@@ -1,0 +1,9 @@
+<div class="card" style="width: 18rem;">
+    <div class="card-body">
+      <h2 class="card-title">Chapter : {{ i }}</h2>
+      <p class="card-text">Status : {{statuss[i]}}</p>
+      <form action="/show_vid" method="post">
+        <button type="submit" name="videos" value={{video[i]}},{{i}},{{ids}}>Start Learn</button><br/>
+      </form>
+    </div>
+</div>

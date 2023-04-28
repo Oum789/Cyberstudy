@@ -1,18 +1,11 @@
 from Course import CourseCatalog, Course, CourseBoughtCatalog
 from User import User, UserList
-from Payment import ShopCart,Receipt
+from Payment import ShopCart
 from System import System
-
-from fastapi import FastAPI,Body,Request,File,UploadFile,Form,status
+from fastapi import FastAPI, Request, Form, status, UploadFile
 from fastapi.responses import HTMLResponse,RedirectResponse
 from fastapi.templating import Jinja2Templates
 
-import json
-from Course import CourseCatalog, Course, CourseBoughtCatalog
-from typing import Optional
-from fastapi import FastAPI, Request, Form, status, HTTPException, UploadFile, File
-from fastapi.staticfiles import StaticFiles
-import re
 import base64
 
 '''def main():'''
@@ -26,19 +19,29 @@ cart = ShopCart(0)
 course_bought = CourseBoughtCatalog()
 
 #init course
-course1 = Course(177013,1,2.46,"business","AMOGUS",0,"Teach you about how to be a successful imposter")
+course1 = Course(177013,1,2.46,"business","AMOGUS",0,
+                 "Teach you about how to be a successful imposter",
+                 ["http://www.youtube.com/embed/NlOF03DUoWc","http://www.youtube.com/embed/NlOF03DUoWc"],["Not Watched","Not Watched"])
 catalog.add_course_to_list(course1)
 
-course2 = Course(555,1,3.18,"entertain","A",1000,"English Alphabet but only the first one")
+course2 = Course(555,1,3.18,"entertain","A",1000,
+                 "English Alphabet but only the first one",
+                 [],[])
 catalog.add_course_to_list(course2)
 
-course3 = Course(2000,1,1.12,"entertain","B",1234,"Extension from A, now we learn about 2nd character")
+course3 = Course(2000,1,1.12,"entertain","B",1234,
+                 "Extension from A, now we learn about 2nd character",
+                 [],[])
 catalog.add_course_to_list(course3)
 
-course4 = Course(1,2,4.13,"math","THIS_IS_NAME",1000,"Q#(&T)*T#WYB*)OB T($*OL#QYTBBV$QWBO) (Math is hard but my pen is Harder)")
+course4 = Course(1,2,4.13,"math","THIS_IS_NAME",1000,
+                 "Q#(&T)*T#WYB*)OB T($*OL#QYTBBV$QWBO) (Math is hard but my pen is Harder)",
+                 [],[])
 catalog.add_course_to_list(course4)
 
-course5 = Course(777,2,4.6,"science","GENSHIN_BAD",500,"Go touch some grass idiot")
+course5 = Course(777,2,4.6,"science","GENSHIN_BAD",500,
+                 "Go touch some grass idiot",
+                 [],[])
 catalog.add_course_to_list(course5)
 
 #init user
@@ -62,14 +65,20 @@ async def home_tem(request: Request):
     return templates.TemplateResponse("home.html", {"request": request, "username": system.get_user_now().get_name(), "login_status": system.get_login_status(), "catalog": catalog.course_list})
 
 @app.post("/home", response_class=HTMLResponse)
-async def home(request: Request, ids : str = Form(None)):    
-    return templates.TemplateResponse("view_course.html", {"request": request, "ids": ids})
+async def home(request: Request, ids : str = Form(None)): 
+    if system.get_login_status():
+        return_ids = ids
+        if system.get_user_now().check_bookmark(return_ids) == 1:
+            system.get_user_now().add_to_bookmark(catalog.find_course(int(ids)))
+        return templates.TemplateResponse("home.html", {"request": request, "username": system.get_user_now().get_name(), "login_status": system.get_login_status(), "catalog": catalog.course_list, "ids": return_ids})
+    else:
+        redirect_url = request.url_for('login')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
 
 @app.get("/logout", response_class=HTMLResponse)
 async def logout(request: Request): 
     system.set_login_status(False)
-    return templates.TemplateResponse("home.html", {"request": request, "username": system.get_user_now().get_name(), "login_status": system.get_login_status()})
-
+    return templates.TemplateResponse("home.html", {"request": request, "username": system.get_user_now().get_name(), "login_status": system.get_login_status(), "catalog": catalog.course_list})
 
 @app.get("/view_profile", response_class=HTMLResponse)
 async def view_profile_tem(request: Request):
@@ -80,6 +89,25 @@ async def view_profile_tem(request: Request):
 async def view_course_bought_tem(request: Request):
     my_course = course_bought.view_bought_course()
     return templates.TemplateResponse("view_course_bought.html", {"request": request, "my_course": my_course})
+
+@app.get("/view_receipt", response_class=HTMLResponse)
+async def view_receipt_tem(request: Request):
+    return templates.TemplateResponse("view_receipt.html",{"request": request, "receipt": system.get_user_now().get_receipt()})
+
+@app.get("/view_certificate", response_class=HTMLResponse)
+async def view_certificate_tem(request: Request):
+    return templates.TemplateResponse("view_certificate.html",{"request": request})
+
+@app.get("/view_bookmark", response_class=HTMLResponse)
+async def view_bookmark_tem(request: Request):
+    bookmark = system.get_user_now().get_bookmark()
+    return templates.TemplateResponse("view_bookmark.html", {"request": request, "bookmark": bookmark})
+
+@app.post("/view_bookmark", response_class=HTMLResponse)
+async def view_bookmark_delete(request: Request, ids: str = Form(None)):
+    bookmark = system.get_user_now().get_bookmark()
+    bookmark.remove(catalog.find_course(int(ids)))
+    return templates.TemplateResponse("view_bookmark.html", {"request": request, "bookmark": bookmark})
 
 @app.get("/change_picture", response_class=HTMLResponse)
 async def change_picture_tem(request: Request):
@@ -226,8 +254,9 @@ async def course(request: Request, ids : str = Form(None)):
 def add_to_cart(request: Request, ids : str = Form(None)):
     course = catalog.find_course(int(ids))
     check = cart.check_ids(ids)
+    check2 = course_bought.check_ids(ids)
     print(check)
-    if check == 0:
+    if check == 0 or check2 == 0:
         diff = course.get_diff()
         duration = course.get_duration()
         genre = course.get_genre()
@@ -264,6 +293,11 @@ def add_to_cart(request: Request, ids : str = Form(None)):
                                                                   "price":price,
                                                                   "detail":detail,
                                                                   "ids":id_dict})
+    
+@app.post("/clear_cart")
+def clear_cart(request : Request):
+    result = cart.reset_buying_list()
+    return templates.TemplateResponse("shopcart.html", {"request":request, "result":result, "price": cart.get_total_price()})
 
 @app.post("/checkpass")
 async def login(request: Request, email : str = Form(None),password : str = Form(None)):
@@ -291,12 +325,18 @@ async def add(request: Request):
 
 
 @app.post("/add_course")
-async def add_course(request: Request, ids : str = Form(None),diff : str = Form(None),duration : str = Form(None),genre : str = Form(None),title : str = Form(None),price : str = Form(None)):
-    if ids == None or diff == None or duration == None or genre == None or title == None or price == None:
+async def add_course(request: Request, ids : str = Form(None),diff : str = Form(None),duration : str = Form(None),
+                     genre : str = Form(None),title : str = Form(None),price : str = Form(None),detail: str = Form(None),
+                     video : str = Form(None)):
+    if ids == None or diff == None or duration == None or genre == None or title == None or price == None or detail == None or video == None:
         redirect_url = request.url_for('admin')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     else:
-        check = catalog.admin_add_course_to_list(int(ids),diff,int(duration),genre,title,int(price))
+        video_list = video.split(",")
+        statuss = []
+        for i in range(len(video_list)):
+            statuss.append("Not Watched")
+        check = catalog.admin_add_course_to_list(int(ids),diff,int(duration),genre,title,int(price),detail,video_list,statuss)
         if check == 0:
             return templates.TemplateResponse("admin.html",context={"request": request,"status_add_course": "ID already taken"})
         else:
@@ -328,12 +368,18 @@ async def remove_course(request: Request, ids : str = Form(None)):
 # {"id":123456}
 
 @app.post("/edit_course")
-async def edit_course(request: Request, ids : str = Form(None),diff : str = Form(None),duration : str = Form(None),genre : str = Form(None),title : str = Form(None),price : str = Form(None)):
-    if ids == None or diff == None or duration == None or genre == None or title == None or price == None:
+async def edit_course(request: Request, ids : str = Form(None),diff : str = Form(None),duration : str = Form(None),
+                     genre : str = Form(None),title : str = Form(None),price : str = Form(None),detail: str = Form(None),
+                     video : str = Form(None)):
+    if ids == None or diff == None or duration == None or genre == None or title == None or price == None or detail == None or video == None:
         redirect_url = request.url_for('admin')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     else:
-        check = catalog.edit_course_from_list(int(ids),diff,int(duration),genre,title,int(price))
+        video_list = video.split(",")
+        statuss = []
+        for i in range(len(video_list)):
+            statuss.append("Not Watched")
+        check = catalog.edit_course_from_list(int(ids),diff,int(duration),genre,title,int(price),detail,video,statuss)
         if check == 0:
             return templates.TemplateResponse("admin.html",context={"request": request,"status_edit_course": "ID not found"})
         else:
@@ -416,14 +462,33 @@ async def pay(request:Request,username : str = Form(None),money : str = Form(Non
         total_price = cart.get_total_price()
         if int(money) == int(total_price) and user_list.find_user(username) != 0:
             user = user_list.find_user(username)
+            receipt = system.get_user_now().make_receipt(cart.get_buying_list(), cart.get_total_price())
+            system.get_user_now().add_receipt_to_list(receipt)
             course_bought.add_course_to_list(cart.get_buying_list(),user.get_name())
-            receipt = Receipt("receipt_pic.png","order_date",1)
-            user.add_receipt_to_list(receipt)
             cart.reset_buying_list()
-            return templates.TemplateResponse('payment_status.html', context={'request': request, "statuss":"Successful"})
+            return templates.TemplateResponse('payment_status.html', context={'request': request, "statuss":"Successful", "receipt": receipt})
         else:
             return templates.TemplateResponse('payment.html', context={'request': request, "statuss":"Please insert correct amount of money and username"})
         
 # testcase payment
 # {"money":2234,
 #  "username":"Rimi"}
+        
+    
+@app.post("/study")
+def study(request:Request, ids : str = Form(None)):
+    course = course_bought.find_course(system.get_user_now().get_name(),ids)
+    video = course.get_video()
+    statuss = course.get_status()
+    length = len(video)
+    progress = course.get_progress()
+    return templates.TemplateResponse('study.html', context={'request': request,"video":video,"statuss":statuss,"ids" : ids,"length":length,"progress":progress})
+
+@app.post("/show_vid")
+def show_vid(request:Request, videos : str = Form(None)):
+    data = videos.split(",")
+    video = data[0] #0 = url/ 1 = position/ 2 = id
+    course = course_bought.find_course(system.get_user_now().get_name(),data[2])
+    course.set_status(int(data[1]),"Watched")
+    course.update_progress()
+    return templates.TemplateResponse('show_vid.html', context={'request': request,"videos":video})

@@ -5,6 +5,7 @@ class User:
         self.__name = name
         self.__email = email
         self.__password = password
+        self.__bookmark = []
         self.__receipt_list = []
     
     def get_picture(self):
@@ -19,11 +20,36 @@ class User:
     def get_password(self):
         return self.__password
     
+    def get_bookmark(self):
+        return self.__bookmark
+    
+    def get_receipt(self):
+        return self.__receipt_list
+    
+    def add_to_bookmark(self, course):
+        self.__bookmark.append(course)
+
+    def check_bookmark(self, ids):
+        for i in self.__bookmark:
+            if i.get_id() == int(ids):
+                return 0
+        return 1
+    
+    def make_receipt(self, cart_list, total_price):
+        receipt = []
+        for j in cart_list:
+            my_dict = {}
+            my_dict["Title"] = j.get_title()
+            my_dict["Price"] = j.get_price()
+            receipt.append(my_dict)
+        receipt.append({"Total Price": total_price})
+        return receipt
+    
     def view_profile(self):
         return {"picture": self.get_picture(), "name": self.get_name(), "email": self.get_email(),"password": self.get_password()}
     
-    def add_receipt_to_list(self,Receipt):
-        self.__receipt_list.append(Receipt)
+    def add_receipt_to_list(self,receipt):
+        self.__receipt_list.append(receipt)
     
     def change_password(self,new_password,old_password):
         password_pattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$"
@@ -71,6 +97,8 @@ class User:
         
     def change_picture(self, picture):
         self.__picture = picture
+
+
 
         
 

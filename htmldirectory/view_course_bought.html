@@ -23,6 +23,9 @@
               <p class="exp">EXP : {{my_course[i]["exp"]}}</p>
               <p class="progress">Progress : {{my_course[i]["progress"]}}</p>
               <p class="owner">Owner : {{my_course[i]["owner"]}}</p>
+              <form action="/study" method="post">
+                <p><button name="ids" value={{my_course[i]["ids"]}}>Study</button></p>
+              </form>
         </div>
     {% endfor %}
     <p><button onClick="location.href='/home'">Back to Home</button></p>

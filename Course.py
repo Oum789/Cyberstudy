@@ -1,5 +1,5 @@
 class Course:
-    def __init__(self,ids,diff,duration,genre,title,price,detail):
+    def __init__(self,ids,diff,duration,genre,title,price,detail,video,status_list):
         self.__id = ids
         self.__diff = diff
         self.__duration = duration
@@ -7,6 +7,8 @@ class Course:
         self.__title = title
         self.__price = price
         self.__detail = detail
+        self.__video = video
+        self.__status_list = status_list
     
     def get_id(self):
         return self.__id
@@ -28,6 +30,21 @@ class Course:
     
     def get_detail(self):
         return self.__detail
+    
+    def get_video(self):
+        return self.__video
+    
+    def get_status(self):
+        return self.__status_list
+    
+    def set_status(self,position,status):
+        self.__status_list[position] = status
+
+    def set_statuss(self,statuss):
+        self.__status_list = statuss
+
+    def set_video(self,video):
+        self.__video = video
     
     def set_diff(self, diff):
         self.__diff = diff
@@ -51,10 +68,10 @@ class CourseCatalog:
     def __init__(self):
         self.course_list = [] #list of course object
 
-    def admin_add_course_to_list(self,ids,diff,duration,genre,title,price):
+    def admin_add_course_to_list(self,ids,diff,duration,genre,title,price,detail,video,statuss):
         checking = self.find_course(ids)
         if checking == 0:
-            newcourse = Course(int(ids),int(diff),int(duration),genre,title,int(price))
+            newcourse = Course(int(ids),int(diff),int(duration),genre,title,int(price),detail,video,statuss)
             self.course_list.append(newcourse)
             return 1
         else:
@@ -66,7 +83,7 @@ class CourseCatalog:
     def remove_course_from_list(self,course):
         self.course_list.remove(course)
 
-    def edit_course_from_list(self,ids,diff,duration,genre,title,price):
+    def edit_course_from_list(self,ids,diff,duration,genre,title,price,detail,video,statuss):
         old_course_info = self.find_course(ids)
         if old_course_info == 0:
             return 0
@@ -76,6 +93,10 @@ class CourseCatalog:
             old_course_info.set_genre(genre)
             old_course_info.set_title(title)
             old_course_info.set_price(price)
+            old_course_info.set_detail(detail)
+            old_course_info.set_video(video)
+            old_course_info.set_statuss(statuss)
+
             return 1
 
     def find_course(self,id):
@@ -168,8 +189,8 @@ class CourseCatalog:
                 print("No type matched - pls try again")
     
 class CourseBought(Course):
-    def __init__(self, expired_date, progress,course_owner,ids,diff,duration,genre,title,price):
-        Course.__init__(self,ids,diff,duration,genre,title,price)
+    def __init__(self, expired_date, progress,course_owner,ids,diff,duration,genre,title,price,detail,video,status_list):
+        Course.__init__(self,ids,diff,duration,genre,title,price,detail,video,status_list)
         self.__expired_date = expired_date
         self.__progress = progress
         self.__course_owner = course_owner
@@ -180,6 +201,14 @@ class CourseBought(Course):
     def get_progress(self):
         return self.__progress
     
+    def update_progress(self):
+        watched = 0
+        for i in self.get_status():
+            if i == "Watched":
+                watched +=1
+        notwatched = len(self.get_video())
+        self.__progress = watched/notwatched *100
+
     def get_course_owner(self):
         return self.__course_owner
 
@@ -189,10 +218,23 @@ class CourseBoughtCatalog:
 
     def add_course_to_list(self,course,username):
         for i in range (len(course)):
-            course[i] = CourseBought("expired_date",0,username,course[i].get_id(),course[i].get_diff(),
-                                     course[i].get_duration(),course[i].get_genre(),course[i].get_title(),course[i].get_price())
+            course[i] = CourseBought("expired_date",0,username,
+                                     course[i].get_id(),course[i].get_diff(),course[i].get_duration(), course[i].get_genre(),
+                                     course[i].get_title(),course[i].get_price(), course[i].get_detail(),course[i].get_video(),course[i].get_status())
             self.__course_owned.append(course[i])
-            print("added")
+        
+    def find_course(self,username,ids):
+        for i in self.__course_owned:
+            if i.get_course_owner() == username:
+                if i.get_id() == int(ids):
+                    return i
+        return 0
+
+    def check_ids(self,id):
+        for i in self.__course_owned:
+            if i.get_id() == int(id):
+                return 0
+        return 1
 
     def get_list(self):
         return self.__course_owned
@@ -212,6 +254,7 @@ class CourseBoughtCatalog:
             my_dict["exp"] = j.get_expired_date()
             my_dict["progress"] = j.get_progress()
             my_dict["owner"] = j.get_course_owner()
+            my_dict["ids"] = j.get_id()      
             my_course[i] = my_dict
             i = i + 1
         return my_course

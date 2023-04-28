@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lange="en">
+<head>
+    <meta charset="UTF-8">
+    <title>STUDY</title>
+    <style>
+    .box {
+
+        background-color: lightgrey;
+        width: 300px;
+        border: 15px solid green;
+        padding: 50px;
+        margin: 20px;
+      }
+    </style>
+</head>
+<body>
+<h1>Study</h1>
+<div>
+    <h3>Course Progress : {{progress}}%</h3>
+    {% for i in range(length) %}
+        {% include "box_template_study.html" %}
+    {% endfor %}
+</div>
+<form action="/home">
+    <button type="submit">Back to Home</button><br/>
+</form>
+</body>

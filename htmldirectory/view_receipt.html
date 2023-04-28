@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lange="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MY RECEIPT</title>
+    <style>
+    .box {
+
+        background-color: lightgrey;
+        width: 300px;
+        border: 15px solid green;
+        padding: 50px;
+        margin: 20px;
+      }
+    </style>
+</head>
+<body>
+<h1>My Receipt</h1> 
+{% for i in receipt %}
+<div class="box" style="width: 18rem;">
+    
+    {% for j in i %}
+    {% for k in j %}
+                <h4>{{k}} : {{j[k]}}</h4>
+    {% endfor %}
+    {% endfor %}
+    
+</div>
+{% endfor %}
+    <p><button onClick="location.href='/home'">Back to Home</button></p>  
+</body>
+</html>
