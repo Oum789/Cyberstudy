@@ -28,6 +28,9 @@
             <form action="/view_bookmark" method="post">
                 <button type="submit" name="ids" class="btn btn-primary btn-lg" value={{i.get_id()}}>Delete from Bookmark</button><br/>
             </form>
+            <form action="/course" method="post">
+                <button type="submit" name="ids" class="btn btn-primary btn-lg" value={{i.get_id()}}>View Details</button><br/>
+            </form>
         </div>
     {% else %}
         <div><p>Bookmark is Empty</p></div>

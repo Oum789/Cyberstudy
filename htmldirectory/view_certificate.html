@@ -5,7 +5,7 @@
     <title>MY CERTIFICATE</title>
     <style>
     .box {
-
+        text-align: center;
         background-color: lightgrey;
         width: 300px;
         border: 15px solid green;
@@ -16,9 +16,16 @@
 </head>
 <body>
 <h1>My Certificate</h1>
-<div>
-    
+{% for i in my_course %}
+    {% if i.get_progress() == 100 %}
+        <div class="box" style="width: 18rem;">
+            <h1>Certificate</h1>
+            <p>This is to certify that</p>
+            <h3>{{i.get_course_owner()}}</h3>
+            <p>has completed the course</p>
+            <h3>{{i.get_title()}}</h3>
+        </div>
+    {% endif %}
+{% endfor %}
     <p><button onClick="location.href='/home'">Back to Home</button></p>
-    
-</div>
 </body>

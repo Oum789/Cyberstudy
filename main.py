@@ -87,7 +87,7 @@ async def view_profile_tem(request: Request):
 
 @app.get("/view_course_bought", response_class=HTMLResponse)
 async def view_course_bought_tem(request: Request):
-    my_course = course_bought.view_bought_course()
+    my_course = course_bought.view_bought_course(system.get_user_now().get_name())
     return templates.TemplateResponse("view_course_bought.html", {"request": request, "my_course": my_course})
 
 @app.get("/view_receipt", response_class=HTMLResponse)
@@ -96,7 +96,8 @@ async def view_receipt_tem(request: Request):
 
 @app.get("/view_certificate", response_class=HTMLResponse)
 async def view_certificate_tem(request: Request):
-    return templates.TemplateResponse("view_certificate.html",{"request": request})
+    course_owned = course_bought.get_list()
+    return templates.TemplateResponse("view_certificate.html",{"request": request, "my_course": course_owned})
 
 @app.get("/view_bookmark", response_class=HTMLResponse)
 async def view_bookmark_tem(request: Request):
@@ -254,7 +255,7 @@ async def course(request: Request, ids : str = Form(None)):
 def add_to_cart(request: Request, ids : str = Form(None)):
     course = catalog.find_course(int(ids))
     check = cart.check_ids(ids)
-    check2 = course_bought.check_ids(ids)
+    check2 = course_bought.check_course_bought(system.get_user_now().get_name(),ids)
     print(check)
     if check == 0 or check2 == 0:
         diff = course.get_diff()
@@ -399,7 +400,7 @@ async def search_title(request:Request,keyword : str = Form(None)):
     else:
         result = catalog.search_by_title(keyword)
         if result == {}:
-            return {}
+            return templates.TemplateResponse('search_not_found.html', context={'request': request})
         else :
             return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
     
@@ -415,7 +416,7 @@ async def search_diff(request:Request,diff : str = Form(None)):
     else:
         result = catalog.search_by_diff(int(diff))
         if result == {}:
-            return {}
+            return templates.TemplateResponse('search_not_found.html', context={'request': request})
         else :
             return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
 
@@ -430,7 +431,7 @@ async def search_genre(request:Request,genre : str = Form(None)):
     else:
         result = catalog.search_by_genre(genre)
         if result == {}:
-            return {}
+            return templates.TemplateResponse('search_not_found.html', context={'request': request})
         else :
             return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
 
@@ -445,7 +446,7 @@ async def search_duration(request:Request,duration_min : str = Form(None),durati
     else:
         result = catalog.search_by_duration(int(duration_min),int(duration_max))
         if result == {}:
-            return {}
+            return templates.TemplateResponse('search_not_found.html', context={'request': request})
         else :
             return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
 

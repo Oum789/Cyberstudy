@@ -194,6 +194,7 @@ class CourseBought(Course):
         self.__expired_date = expired_date
         self.__progress = progress
         self.__course_owner = course_owner
+        self.__finished = False
 
     def get_expired_date(self):
         return self.__expired_date
@@ -201,13 +202,19 @@ class CourseBought(Course):
     def get_progress(self):
         return self.__progress
     
+    def get_finished(self):
+        return self.__finished
+    
     def update_progress(self):
         watched = 0
         for i in self.get_status():
             if i == "Watched":
                 watched +=1
         notwatched = len(self.get_video())
-        self.__progress = watched/notwatched *100
+        if self.__finished != 100:
+            self.__progress = watched/notwatched *100
+        if self.__progress == 100 and self.__finished == False:
+            self.__finished = True
 
     def get_course_owner(self):
         return self.__course_owner
@@ -229,6 +236,13 @@ class CourseBoughtCatalog:
                 if i.get_id() == int(ids):
                     return i
         return 0
+    
+    def check_course_bought(self,username,ids):
+        for i in self.__course_owned:
+            if i.get_course_owner() == username:
+                if i.get_id() == int(ids):
+                    return 0
+        return 1
 
     def check_ids(self,id):
         for i in self.__course_owned:
@@ -244,17 +258,18 @@ class CourseBoughtCatalog:
 
     def activate_course():
         pass
-        
-    def view_bought_course(self):
+
+    def view_bought_course(self,user_now):
         my_course = {}
         i = 1   
         for j in self.__course_owned:
-            my_dict = {}
-            my_dict["name"] = j.get_title()
-            my_dict["exp"] = j.get_expired_date()
-            my_dict["progress"] = j.get_progress()
-            my_dict["owner"] = j.get_course_owner()
-            my_dict["ids"] = j.get_id()      
-            my_course[i] = my_dict
-            i = i + 1
+            if j.get_course_owner() == user_now:
+                my_dict = {}
+                my_dict["name"] = j.get_title()
+                my_dict["exp"] = j.get_expired_date()
+                my_dict["progress"] = j.get_progress()
+                my_dict["owner"] = j.get_course_owner()
+                my_dict["ids"] = j.get_id()      
+                my_course[i] = my_dict
+                i = i + 1
         return my_course
