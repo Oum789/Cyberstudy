@@ -18,11 +18,6 @@ class ShopCart:
         self.update_price(price)
         self.__buying_list.append(course)
 
-    def reset_cart(self):
-        self.__buying_list.clear()
-        self.__total_price = 0
-        return self.__buying_list
-
     def update_price(self,price):
         self.__total_price += price
 
@@ -56,12 +51,3 @@ class ShopCart:
             counter+=1
 
         return result
-    
-# class Receipt:
-#     def __init__(self,receipt_payment,order_date,order):
-#         self.__receipt_payment = receipt_payment
-#         self.__order_date = order_date
-#         self.__order = order
-
-#     def save_receipt():
-#         pass

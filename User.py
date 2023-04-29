@@ -48,8 +48,8 @@ class User:
     def view_profile(self):
         return {"picture": self.get_picture(), "name": self.get_name(), "email": self.get_email(),"password": self.get_password()}
     
-    def add_receipt_to_list(self,Receipt):
-        self.__receipt_list.append(Receipt)
+    def add_receipt_to_list(self,receipt):
+        self.__receipt_list.append(receipt)
     
     def change_password(self,new_password,old_password):
         password_pattern = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$"

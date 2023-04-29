@@ -17,8 +17,12 @@
 <body>
 <h1>Study</h1>
 <div>
-
-    <p><button onClick="location.href='/view_course_bought'">Back to Your Course</button></p>
-    
+    <h3>Course Progress : {{progress}}%</h3>
+    {% for i in range(length) %}
+        {% include "box_template_study.html" %}
+    {% endfor %}
 </div>
+<form action="/home">
+    <button type="submit">Back to Home</button><br/>
+</form>
 </body>
