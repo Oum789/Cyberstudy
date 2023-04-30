@@ -147,3 +147,12 @@ class UserList:
             if mail == user.get_email() and pw == user.get_password():
                 return user
         return 0
+    
+class Admin(User):
+    def __init__(self, picture, name , email, password):
+         User.__init__(self, picture, name , email, password)
+
+    def check_pass(self,mail,pw): 
+        if mail == self.get_email() and pw == self.get_password():
+                return 1
+        return 0

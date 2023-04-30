@@ -1,5 +1,5 @@
 from Course import CourseCatalog, Course, CourseBoughtCatalog
-from User import User, UserList
+from User import User, UserList,Admin
 from Payment import ShopCart
 from System import System
 from fastapi import FastAPI, Request, Form, status, UploadFile
@@ -56,13 +56,16 @@ user_list.add_user_to_list(user3)
 
 guest = User(0,"Guest","","")
 
+ad = Admin(0,"Admin","b@gmail.com","a")
+
 #System
-system = System(guest,False)
+system = System(guest,False,False)
 profile_picture = None 
 
 @app.get("/home", response_class=HTMLResponse)
 async def home_tem(request: Request):    
-    return templates.TemplateResponse("home.html", {"request": request, "username": system.get_user_now().get_name(), "login_status": system.get_login_status(), "catalog": catalog.course_list})
+    return templates.TemplateResponse("home.html", {"request": request, "username": system.get_user_now().get_name(),
+                                                     "login_status": system.get_login_status(), "admin_status": system.get_admin_status(), "catalog": catalog.course_list})
 
 @app.post("/home", response_class=HTMLResponse)
 async def home(request: Request, ids : str = Form(None)): 
@@ -78,6 +81,8 @@ async def home(request: Request, ids : str = Form(None)):
 @app.get("/logout", response_class=HTMLResponse)
 async def logout(request: Request): 
     system.set_login_status(False)
+    system.set_admin_status(False)
+    cart.reset_buying_list()
     return templates.TemplateResponse("home.html", {"request": request, "username": system.get_user_now().get_name(), "login_status": system.get_login_status(), "catalog": catalog.course_list})
 
 @app.get("/view_profile", response_class=HTMLResponse)
@@ -96,7 +101,7 @@ async def view_receipt_tem(request: Request):
 
 @app.get("/view_certificate", response_class=HTMLResponse)
 async def view_certificate_tem(request: Request):
-    course_owned = course_bought.get_list()
+    course_owned = course_bought.get_owned_list(system.get_user_now().get_name())
     return templates.TemplateResponse("view_certificate.html",{"request": request, "my_course": course_owned})
 
 @app.get("/view_bookmark", response_class=HTMLResponse)
@@ -254,8 +259,8 @@ async def course(request: Request, ids : str = Form(None)):
 @app.post("/add_to_cart")
 def add_to_cart(request: Request, ids : str = Form(None)):
     course = catalog.find_course(int(ids))
-    check = cart.check_ids(ids)
-    check2 = course_bought.check_course_bought(system.get_user_now().get_name(),ids)
+    check2 = cart.check_ids(ids)
+    check = course_bought.check_course_bought(system.get_user_now().get_name(),ids)
     print(check)
     if check == 0 or check2 == 0:
         diff = course.get_diff()
@@ -275,7 +280,7 @@ def add_to_cart(request: Request, ids : str = Form(None)):
                                                                   "detail":detail,
                                                                   "ids":id_dict})
     else:
-        cart.add_to_cart(course)
+        cart.add_to_buying_list(course)
         # print(cart.__buying_list)
         diff = course.get_diff()
         duration = course.get_duration()
@@ -302,8 +307,15 @@ def clear_cart(request : Request):
 
 @app.post("/checkpass")
 async def login(request: Request, email : str = Form(None),password : str = Form(None)):
-    user = user_list.check_password(email,password)  
-    if user == 0:
+    user = user_list.check_password(email,password)
+    admins = ad.check_pass(email,password) 
+    if admins == 1:
+        system.set_login_status(True)
+        system.set_admin_status(True)        
+        system.set_user_now(ad)
+        redirect_url = request.url_for('home')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    elif user == 0:
         redirect_url = request.url_for('jail')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     else:
@@ -490,6 +502,6 @@ def show_vid(request:Request, videos : str = Form(None)):
     data = videos.split(",")
     video = data[0] #0 = url/ 1 = position/ 2 = id
     course = course_bought.find_course(system.get_user_now().get_name(),data[2])
-    course.set_status(int(data[1]),"Watched")
+    course.set_status_from_position(int(data[1]),"Watched")
     course.update_progress()
     return templates.TemplateResponse('show_vid.html', context={'request': request,"videos":video})

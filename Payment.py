@@ -13,7 +13,7 @@ class ShopCart:
         self.__buying_list = []
         self.__total_price = 0
 
-    def add_to_cart(self,course):
+    def add_to_buying_list(self,course):
         price = course.get_price()
         self.update_price(price)
         self.__buying_list.append(course)
@@ -26,9 +26,6 @@ class ShopCart:
             return 1
         else:
             return 0    
-
-    def add_to_course_bought():
-        pass
 
     def check_ids(self,id):
         for i in self.__buying_list:
