@@ -242,8 +242,10 @@ class CourseBoughtCatalog:
         for i in self.__course_owned:
             if i.get_course_owner() == username:
                 result.append(i)
-                return result
-        return []
+        if result == []:
+            return []
+        return result
+        
 
     def view_bought_course(self,user_now):
         my_course = {}

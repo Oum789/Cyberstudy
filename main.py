@@ -21,12 +21,15 @@ course_bought = CourseBoughtCatalog()
 #init course
 course1 = Course(177013,1,2.46,"business","AMOGUS",0,
                  "Teach you about how to be a successful imposter",
-                 ["http://www.youtube.com/embed/NlOF03DUoWc","http://www.youtube.com/embed/NlOF03DUoWc"],["Not Watched","Not Watched"])
+                 ["http://www.youtube.com/embed/NlOF03DUoWc",
+                  "http://www.youtube.com/embed/WCGtg5JJjd0",
+                  "http://www.youtube.com/embed/UPR0i498PxU"],
+                  ["Not Watched","Not Watched","Not Watched"])
 catalog.add_course_to_list(course1)
 
 course2 = Course(555,1,3.18,"entertain","A",1000,
                  "English Alphabet but only the first one",
-                 [],[])
+                 ["http://www.youtube.com/embed/UPR0i498PxU"],["Not Watched"])
 catalog.add_course_to_list(course2)
 
 course3 = Course(2000,1,1.12,"entertain","B",1234,
