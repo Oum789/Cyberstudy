@@ -67,7 +67,7 @@ class User:
     def change_username(self,new_username,user_list,password):
         username_pattern = r'^(?![-._])(?!.*[_.-]{2})[\w.-]{6,30}(?<![-._])$'
         if password == self.get_password() and re.match(username_pattern, new_username) :
-            for i in user_list.user_list:
+            for i in user_list.get_user_list():
                     if i.get_name() != new_username:
                         pass
                     else:
@@ -83,7 +83,7 @@ class User:
     def change_email(self,new_email,user_list,password):
         email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
         if password == self.get_password() and re.fullmatch(email_pattern, new_email) :
-            for i in user_list.user_list:
+            for i in user_list.get_user_list():
                     if i.get_email() != new_email:
                         pass
                     else:
@@ -108,8 +108,8 @@ class UserList:
     def __init__(self) -> None:
         self.__user_list = []
 
-    def add_user_to_list(self,User):
-        self.__user_list.append(User)
+    def add_user_to_list(self,user):
+        self.__user_list.append(user)
 
     def register(self, picture, username, email, password, con_password):
         username_pattern = r'^(?![-._])(?!.*[_.-]{2})[\w.-]{6,30}(?<![-._])$'
@@ -134,6 +134,10 @@ class UserList:
         elif password != con_password:
             return {"status" : "Two passwords doesn't match"}
         
+    def get_user_list(self):
+        return self.__user_list
+
+
     def find_user(self,name):
         for i in self.__user_list:
             username = i.get_name()
@@ -146,4 +150,25 @@ class UserList:
             user = self.__user_list[i]
             if mail == user.get_email() and pw == user.get_password():
                 return user
+        return 0
+    
+class Admin(User):
+    def __init__(self, picture, name , email, password,permission):
+         User.__init__(self, picture, name , email, password)
+         self.__permission = permission
+
+    def get_permission(self):
+        return self.__permission
+class AdminList:
+    def __init__(self) -> None:
+        self.__admin_list = []
+
+    def add_admin_to_list(self,admin):
+        self.__admin_list.append(admin)
+
+    def check_password(self,mail,pw):
+        for i in range (len(self.__admin_list)):
+            admin = self.__admin_list[i]
+            if mail == admin.get_email() and pw == admin.get_password():
+                return admin
         return 0

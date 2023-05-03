@@ -1,5 +1,5 @@
 from Course import CourseCatalog, Course, CourseBoughtCatalog
-from User import User, UserList
+from User import User, UserList,Admin,AdminList
 from Payment import ShopCart
 from System import System
 from fastapi import FastAPI, Request, Form, status, UploadFile
@@ -13,6 +13,7 @@ templates = Jinja2Templates(directory='htmldirectory')
 
 app = FastAPI()
 
+ad_list = AdminList()
 user_list = UserList()
 catalog = CourseCatalog()
 cart = ShopCart(0)
@@ -21,12 +22,15 @@ course_bought = CourseBoughtCatalog()
 #init course
 course1 = Course(177013,1,2.46,"business","AMOGUS",0,
                  "Teach you about how to be a successful imposter",
-                 ["http://www.youtube.com/embed/NlOF03DUoWc","http://www.youtube.com/embed/NlOF03DUoWc"],["Not Watched","Not Watched"])
+                 ["http://www.youtube.com/embed/NlOF03DUoWc",
+                  "http://www.youtube.com/embed/WCGtg5JJjd0",
+                  "http://www.youtube.com/embed/UPR0i498PxU"],
+                  ["Not Watched","Not Watched","Not Watched"])
 catalog.add_course_to_list(course1)
 
 course2 = Course(555,1,3.18,"entertain","A",1000,
                  "English Alphabet but only the first one",
-                 [],[])
+                 ["http://www.youtube.com/embed/UPR0i498PxU"],["Not Watched"])
 catalog.add_course_to_list(course2)
 
 course3 = Course(2000,1,1.12,"entertain","B",1234,
@@ -56,13 +60,17 @@ user_list.add_user_to_list(user3)
 
 guest = User(0,"Guest","","")
 
+ad = Admin(0,"Admin","b@gmail.com","a",[True,True,True])
+ad_list.add_admin_to_list(ad)
+
 #System
-system = System(guest,False)
+system = System(guest,False,False)
 profile_picture = None 
 
 @app.get("/home", response_class=HTMLResponse)
 async def home_tem(request: Request):    
-    return templates.TemplateResponse("home.html", {"request": request, "username": system.get_user_now().get_name(), "login_status": system.get_login_status(), "catalog": catalog.course_list})
+    return templates.TemplateResponse("home.html", {"request": request, "username": system.get_user_now().get_name(),
+                                                     "login_status": system.get_login_status(), "admin_status": system.get_admin_status(), "catalog": catalog.course_list})
 
 @app.post("/home", response_class=HTMLResponse)
 async def home(request: Request, ids : str = Form(None)): 
@@ -78,6 +86,8 @@ async def home(request: Request, ids : str = Form(None)):
 @app.get("/logout", response_class=HTMLResponse)
 async def logout(request: Request): 
     system.set_login_status(False)
+    system.set_admin_status(False)
+    cart.reset_buying_list()
     return templates.TemplateResponse("home.html", {"request": request, "username": system.get_user_now().get_name(), "login_status": system.get_login_status(), "catalog": catalog.course_list})
 
 @app.get("/view_profile", response_class=HTMLResponse)
@@ -87,7 +97,7 @@ async def view_profile_tem(request: Request):
 
 @app.get("/view_course_bought", response_class=HTMLResponse)
 async def view_course_bought_tem(request: Request):
-    my_course = course_bought.view_bought_course()
+    my_course = course_bought.view_bought_course(system.get_user_now().get_name())
     return templates.TemplateResponse("view_course_bought.html", {"request": request, "my_course": my_course})
 
 @app.get("/view_receipt", response_class=HTMLResponse)
@@ -96,7 +106,7 @@ async def view_receipt_tem(request: Request):
 
 @app.get("/view_certificate", response_class=HTMLResponse)
 async def view_certificate_tem(request: Request):
-    course_owned = course_bought.get_list()
+    course_owned = course_bought.get_owned_list(system.get_user_now().get_name())
     return templates.TemplateResponse("view_certificate.html",{"request": request, "my_course": course_owned})
 
 @app.get("/view_bookmark", response_class=HTMLResponse)
@@ -142,6 +152,7 @@ async def change_username(request: Request, new_username: str = Form(None), pass
     if new_username == None or password == None:
         return templates.TemplateResponse("change_username.html", {"request": request, "status": "ERROR : Please Input Your Data"})
     else:
+        course_bought.change_owner(system.get_user_now().get_name(), new_username)
         user_change_status = system.get_user_now().change_username(new_username, user_list, password)
         return templates.TemplateResponse("change_username.html", {"request": request, "status": user_change_status["status"]})
 
@@ -254,8 +265,8 @@ async def course(request: Request, ids : str = Form(None)):
 @app.post("/add_to_cart")
 def add_to_cart(request: Request, ids : str = Form(None)):
     course = catalog.find_course(int(ids))
-    check = cart.check_ids(ids)
-    check2 = course_bought.check_ids(ids)
+    check2 = cart.check_ids(ids)
+    check = course_bought.check_course_bought(system.get_user_now().get_name(),ids)
     print(check)
     if check == 0 or check2 == 0:
         diff = course.get_diff()
@@ -275,7 +286,7 @@ def add_to_cart(request: Request, ids : str = Form(None)):
                                                                   "detail":detail,
                                                                   "ids":id_dict})
     else:
-        cart.add_to_cart(course)
+        cart.add_to_buying_list(course)
         # print(cart.__buying_list)
         diff = course.get_diff()
         duration = course.get_duration()
@@ -302,8 +313,15 @@ def clear_cart(request : Request):
 
 @app.post("/checkpass")
 async def login(request: Request, email : str = Form(None),password : str = Form(None)):
-    user = user_list.check_password(email,password)  
-    if user == 0:
+    user = user_list.check_password(email,password)
+    admins = ad_list.check_password(email,password) 
+    if admins != 0:
+        system.set_login_status(True)
+        system.set_admin_status(True)        
+        system.set_user_now(admins)
+        redirect_url = request.url_for('home')
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    elif user == 0:
         redirect_url = request.url_for('jail')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     else:
@@ -332,6 +350,8 @@ async def add_course(request: Request, ids : str = Form(None),diff : str = Form(
     if ids == None or diff == None or duration == None or genre == None or title == None or price == None or detail == None or video == None:
         redirect_url = request.url_for('admin')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    elif system.get_user_now().get_permission()[0] == False:
+        return templates.TemplateResponse("admin.html",context={"request": request,"status_add_course": "You Don't Have Permission"})
     else:
         video_list = video.split(",")
         statuss = []
@@ -356,6 +376,8 @@ async def remove_course(request: Request, ids : str = Form(None)):
     if ids == None:
         redirect_url = request.url_for('admin')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    elif system.get_user_now().get_permission()[1] == False:
+        return templates.TemplateResponse("admin.html",context={"request": request,"status_add_course": "You Don't Have Permission"})
     else:
         course_selected = catalog.find_course(int(ids))
         if course_selected == 0:
@@ -375,6 +397,8 @@ async def edit_course(request: Request, ids : str = Form(None),diff : str = Form
     if ids == None or diff == None or duration == None or genre == None or title == None or price == None or detail == None or video == None:
         redirect_url = request.url_for('admin')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    elif system.get_user_now().get_permission()[2] == False:
+        return templates.TemplateResponse("admin.html",context={"request": request,"status_add_course": "You Don't Have Permission"})
     else:
         video_list = video.split(",")
         statuss = []
@@ -400,7 +424,7 @@ async def search_title(request:Request,keyword : str = Form(None)):
     else:
         result = catalog.search_by_title(keyword)
         if result == {}:
-            return {}
+            return templates.TemplateResponse('search_not_found.html', context={'request': request})
         else :
             return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
     
@@ -416,7 +440,7 @@ async def search_diff(request:Request,diff : str = Form(None)):
     else:
         result = catalog.search_by_diff(int(diff))
         if result == {}:
-            return {}
+            return templates.TemplateResponse('search_not_found.html', context={'request': request})
         else :
             return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
 
@@ -431,7 +455,7 @@ async def search_genre(request:Request,genre : str = Form(None)):
     else:
         result = catalog.search_by_genre(genre)
         if result == {}:
-            return {}
+            return templates.TemplateResponse('search_not_found.html', context={'request': request})
         else :
             return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
 
@@ -446,7 +470,7 @@ async def search_duration(request:Request,duration_min : str = Form(None),durati
     else:
         result = catalog.search_by_duration(int(duration_min),int(duration_max))
         if result == {}:
-            return {}
+            return templates.TemplateResponse('search_not_found.html', context={'request': request})
         else :
             return templates.TemplateResponse('after_search.html', context={'request': request, 'result': result})
 
@@ -490,6 +514,6 @@ def show_vid(request:Request, videos : str = Form(None)):
     data = videos.split(",")
     video = data[0] #0 = url/ 1 = position/ 2 = id
     course = course_bought.find_course(system.get_user_now().get_name(),data[2])
-    course.set_status(int(data[1]),"Watched")
+    course.set_status_from_position(int(data[1]),"Watched")
     course.update_progress()
     return templates.TemplateResponse('show_vid.html', context={'request': request,"videos":video})

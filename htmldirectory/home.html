@@ -6,11 +6,13 @@
     <style>
         .dropdown {
         display: inline-block;
+        color: #FFFFFF;
         position: relative;
         width: 100px;
         }
         .dropdown-content {
         display: none;
+        color: #FFFFFF;
         position: absolute;
         width: 100%;
         overflow: auto;
@@ -18,6 +20,8 @@
         }
         .dropdown:hover .dropdown-content {
         display: block;
+        color: #FFFFFF;
+        background-color: lightgrey;
         }
         .dropdown-content a {
         display: block;
@@ -43,6 +47,15 @@
     <h1>Home</h1>
     <div>
         {% if login_status == True %}
+            {% if admin_status == True %}
+            <div class="dropdown">
+                <button>{{username}}</button>
+                <div class="dropdown-content">
+                <a href="/admin">Manage Course</a>
+                <a href="/logout">Sign Out</a>
+                </div>
+            </div>
+            {% else %}
             <div class="dropdown">
                 <button>{{username}}</button>
                 <div class="dropdown-content">
@@ -56,6 +69,7 @@
                 <a href="/logout">Sign Out</a>
                 </div>
             </div>
+            {% endif %}
         {% else %}
             <div class="dropdown">
                 <button>Guest</button>
@@ -68,21 +82,23 @@
         {% endif %}
     </div>
     <div>
-        {% for i in catalog %}
-            <div class="box" style="width: 18rem;">
-                <h4 class="title">Title : {{i.get_title()}}</h4>
-                <p class="genre">Genre : {{i.get_genre()}}</p>
-                <p class="difficulty">Difficulty : {{i.get_diff()}}</p>
-                <p class="duration">Duration : {{i.get_duration()}}</p>
-                <p class="price">Price : {{i.get_price()}}</p>
-                <form action="/course" method="post">
-                    <button type="submit" name="ids" class="btn btn-primary btn-lg" value={{i.get_id()}}>View Details</button><br/>
-                </form>
-                <form action="/home" method="post">
-                    <button type="submit" name="ids" class="btn btn-primary btn-lg" value={{i.get_id()}}>Add to Bookmark</button><br/>
-                </form>
-            </div>
-        {% endfor %}
+        {% if admin_status != True %}
+            {% for i in catalog %}
+                <div class="box" style="width: 18rem;">
+                    <h4 class="title">Title : {{i.get_title()}}</h4>
+                    <p class="genre">Genre : {{i.get_genre()}}</p>
+                    <p class="difficulty">Difficulty : {{i.get_diff()}}</p>
+                    <p class="duration">Duration : {{i.get_duration()}}</p>
+                    <p class="price">Price : {{i.get_price()}}</p>
+                    <form action="/course" method="post">
+                        <button type="submit" name="ids" class="btn btn-primary btn-lg" value={{i.get_id()}}>View Details</button><br/>
+                    </form>
+                    <form action="/home" method="post">
+                        <button type="submit" name="ids" class="btn btn-primary btn-lg" value={{i.get_id()}}>Add to Bookmark</button><br/>
+                    </form>
+                </div>
+            {% endfor %}
+        {% endif %}
     </div>
 
 </body>

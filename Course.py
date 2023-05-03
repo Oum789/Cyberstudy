@@ -37,7 +37,7 @@ class Course:
     def get_status(self):
         return self.__status_list
     
-    def set_status(self,position,status):
+    def set_status_from_position(self,position,status):
         self.__status_list[position] = status
 
     def set_statuss(self,statuss):
@@ -105,11 +105,11 @@ class CourseCatalog:
                 return i
         return 0
 
-    def search_by_diff(self,keyword):
+    def search_by_diff(self,diff):
         counter = 0
         filtered_dict = {}
         for i in range (len(self.course_list)):
-            if self.course_list[i].get_diff() == keyword:
+            if self.course_list[i].get_diff() == diff:
                 course_dict = {}
                 course_dict["title"] = self.course_list[i].get_title()
                 course_dict["genre"] = self.course_list[i].get_genre()
@@ -172,22 +172,6 @@ class CourseCatalog:
                 counter+=1
 
         return filtered_dict
-    
-    def edit_course(self,edit_type,data,Course):
-        match edit_type:
-            case "diff" :
-                Course.set_diff(data)
-            case "duration" :
-                Course.set_duration(data)
-            case "genre" :
-                Course.set_genre(data)
-            case "title" :
-                Course.set_title(data)
-            case "price" :
-                Course.set_price(data)
-            case _:
-                print("No type matched - pls try again")
-    
 class CourseBought(Course):
     def __init__(self, expired_date, progress,course_owner,ids,diff,duration,genre,title,price,detail,video,status_list):
         Course.__init__(self,ids,diff,duration,genre,title,price,detail,video,status_list)
@@ -204,6 +188,9 @@ class CourseBought(Course):
     
     def get_finished(self):
         return self.__finished
+    
+    def set_course_owner(self, username):
+        self.__course_owner = username
     
     def update_progress(self):
         watched = 0
@@ -236,6 +223,18 @@ class CourseBoughtCatalog:
                 if i.get_id() == int(ids):
                     return i
         return 0
+    
+    def change_owner(self,username,new_username):
+        for i in self.__course_owned:
+            if i.get_course_owner() == username:
+                i.set_course_owner(new_username)
+    
+    def check_course_bought(self,username,ids):
+        for i in self.__course_owned:
+            if i.get_course_owner() == username:
+                if i.get_id() == int(ids):
+                    return 0
+        return 1
 
     def check_ids(self,id):
         for i in self.__course_owned:
@@ -245,23 +244,28 @@ class CourseBoughtCatalog:
 
     def get_list(self):
         return self.__course_owned
+    
+    def get_owned_list(self,username):
+        result = []
+        for i in self.__course_owned:
+            if i.get_course_owner() == username:
+                result.append(i)
+        if result == []:
+            return []
+        return result
+        
 
-    def download_material():
-        pass
-
-    def activate_course():
-        pass
-
-    def view_bought_course(self):
+    def view_bought_course(self,user_now):
         my_course = {}
         i = 1   
         for j in self.__course_owned:
-            my_dict = {}
-            my_dict["name"] = j.get_title()
-            my_dict["exp"] = j.get_expired_date()
-            my_dict["progress"] = j.get_progress()
-            my_dict["owner"] = j.get_course_owner()
-            my_dict["ids"] = j.get_id()      
-            my_course[i] = my_dict
-            i = i + 1
+            if j.get_course_owner() == user_now:
+                my_dict = {}
+                my_dict["name"] = j.get_title()
+                my_dict["exp"] = j.get_expired_date()
+                my_dict["progress"] = j.get_progress()
+                my_dict["owner"] = j.get_course_owner()
+                my_dict["ids"] = j.get_id()      
+                my_course[i] = my_dict
+                i = i + 1
         return my_course
