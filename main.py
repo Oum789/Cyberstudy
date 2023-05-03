@@ -1,5 +1,5 @@
 from Course import CourseCatalog, Course, CourseBoughtCatalog
-from User import User, UserList,Admin
+from User import User, UserList,Admin,AdminList
 from Payment import ShopCart
 from System import System
 from fastapi import FastAPI, Request, Form, status, UploadFile
@@ -13,6 +13,7 @@ templates = Jinja2Templates(directory='htmldirectory')
 
 app = FastAPI()
 
+ad_list = AdminList()
 user_list = UserList()
 catalog = CourseCatalog()
 cart = ShopCart(0)
@@ -59,7 +60,8 @@ user_list.add_user_to_list(user3)
 
 guest = User(0,"Guest","","")
 
-ad = Admin(0,"Admin","b@gmail.com","a")
+ad = Admin(0,"Admin","b@gmail.com","a",[True,True,True])
+ad_list.add_admin_to_list(ad)
 
 #System
 system = System(guest,False,False)
@@ -311,11 +313,11 @@ def clear_cart(request : Request):
 @app.post("/checkpass")
 async def login(request: Request, email : str = Form(None),password : str = Form(None)):
     user = user_list.check_password(email,password)
-    admins = ad.check_pass(email,password) 
-    if admins == 1:
+    admins = ad_list.check_password(email,password) 
+    if admins != 0:
         system.set_login_status(True)
         system.set_admin_status(True)        
-        system.set_user_now(ad)
+        system.set_user_now(admins)
         redirect_url = request.url_for('home')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     elif user == 0:
@@ -347,6 +349,8 @@ async def add_course(request: Request, ids : str = Form(None),diff : str = Form(
     if ids == None or diff == None or duration == None or genre == None or title == None or price == None or detail == None or video == None:
         redirect_url = request.url_for('admin')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    elif system.get_user_now().get_permission()[0] == False:
+        return templates.TemplateResponse("admin.html",context={"request": request,"status_add_course": "You Don't Have Permission"})
     else:
         video_list = video.split(",")
         statuss = []
@@ -371,6 +375,8 @@ async def remove_course(request: Request, ids : str = Form(None)):
     if ids == None:
         redirect_url = request.url_for('admin')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    elif system.get_user_now().get_permission()[1] == False:
+        return templates.TemplateResponse("admin.html",context={"request": request,"status_add_course": "You Don't Have Permission"})
     else:
         course_selected = catalog.find_course(int(ids))
         if course_selected == 0:
@@ -390,6 +396,8 @@ async def edit_course(request: Request, ids : str = Form(None),diff : str = Form
     if ids == None or diff == None or duration == None or genre == None or title == None or price == None or detail == None or video == None:
         redirect_url = request.url_for('admin')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    elif system.get_user_now().get_permission()[2] == False:
+        return templates.TemplateResponse("admin.html",context={"request": request,"status_add_course": "You Don't Have Permission"})
     else:
         video_list = video.split(",")
         statuss = []

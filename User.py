@@ -108,8 +108,8 @@ class UserList:
     def __init__(self) -> None:
         self.__user_list = []
 
-    def add_user_to_list(self,User):
-        self.__user_list.append(User)
+    def add_user_to_list(self,user):
+        self.__user_list.append(user)
 
     def register(self, picture, username, email, password, con_password):
         username_pattern = r'^(?![-._])(?!.*[_.-]{2})[\w.-]{6,30}(?<![-._])$'
@@ -149,10 +149,22 @@ class UserList:
         return 0
     
 class Admin(User):
-    def __init__(self, picture, name , email, password):
+    def __init__(self, picture, name , email, password,permission):
          User.__init__(self, picture, name , email, password)
+         self.__permission = permission
 
-    def check_pass(self,mail,pw): 
-        if mail == self.get_email() and pw == self.get_password():
-                return 1
+    def get_permission(self):
+        return self.__permission
+class AdminList:
+    def __init__(self) -> None:
+        self.__admin_list = []
+
+    def add_admin_to_list(self,admin):
+        self.__admin_list.append(admin)
+
+    def check_password(self,mail,pw):
+        for i in range (len(self.__admin_list)):
+            admin = self.__admin_list[i]
+            if mail == admin.get_email() and pw == admin.get_password():
+                return admin
         return 0
