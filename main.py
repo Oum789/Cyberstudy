@@ -72,7 +72,7 @@ async def home_tem(request: Request):
     return templates.TemplateResponse("home.html", {"request": request, "username": system.get_user_now().get_name(),
                                                      "login_status": system.get_login_status(), "admin_status": system.get_admin_status(), "catalog": catalog.course_list})
 
-@app.post("/home", response_class=HTMLResponse)
+@app.post("/add_bookmark", response_class=HTMLResponse)
 async def home(request: Request, ids : str = Form(None)): 
     if system.get_login_status():
         return_ids = ids
@@ -114,7 +114,7 @@ async def view_bookmark_tem(request: Request):
     bookmark = system.get_user_now().get_bookmark()
     return templates.TemplateResponse("view_bookmark.html", {"request": request, "bookmark": bookmark})
 
-@app.post("/view_bookmark", response_class=HTMLResponse)
+@app.post("/delete_bookmark", response_class=HTMLResponse)
 async def view_bookmark_delete(request: Request, ids: str = Form(None)):
     bookmark = system.get_user_now().get_bookmark()
     bookmark.remove(catalog.find_course(int(ids)))
@@ -319,7 +319,7 @@ async def login(request: Request, email : str = Form(None),password : str = Form
         system.set_login_status(True)
         system.set_admin_status(True)        
         system.set_user_now(admins)
-        redirect_url = request.url_for('home')
+        redirect_url = request.url_for('home_tem')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     elif user == 0:
         redirect_url = request.url_for('jail')
@@ -327,7 +327,7 @@ async def login(request: Request, email : str = Form(None),password : str = Form
     else:
         system.set_login_status(True)
         system.set_user_now(user)
-        redirect_url = request.url_for('home')
+        redirect_url = request.url_for('home_tem')
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
 
 
